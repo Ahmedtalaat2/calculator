@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Blaka&family=Cairo:wght@200..1000&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Kufam:ital,wght@0,400..900;1,400..900&family=Noto+Naskh+Arabic:wght@400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Readex+Pro:wght@160..700&display=swap');
+
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+body{
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ height: 100vh;
+ background-color: #222831;
+ font-family: Poppins;
+ width: 100%;
+--color: rgba(114, 114, 114, 0.05);
+ background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%,
+  var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%,
+   var(--color) 76%, transparent 77%,transparent),
+     linear-gradient(90deg, transparent 24%, var(--color) 25%, 
+     var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%
+     , var(--color) 76%, transparent 77%,transparent);
+ background-size: 55px 55px;
+ z-index: -999;
+}
+
+#Calculator-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #31363F;
+    width: fit-content;
+    padding: 20px;
+    align-items: center;
+    border-radius: 10px;
+    margin: 10px auto;
+
+}
+#display-area{
+    background-color: #eeeeee;
+    height: 70px;
+    width: 95%;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    padding: 5px;
+    align-items: center;
+    font-size: 1.5rem;
+}
+.calculator-row{
+    margin: 5px auto;
+
+}
+.calculator-row button{
+    width: 110px;
+    height: 60px;
+    font-size: 1.4rem;
+    border: none;
+    border-radius: 5px;
+    margin: 5px;
+    background-color: #76ABAE;
+    color: #EEEEEE;
+    transition: 0.3s;
+}
+.calculator-row button:hover{
+    background-color: #eeeeee;
+    color:#31363F ;
+    cursor: pointer;
+}
+@media (max-width: 768px)  {
+    #Calculator-container {
+        display: flex;
+        flex-direction: column;
+        background-color: #31363F;
+        width: fit-content;
+        padding: 20px;
+        align-items: center;
+        border-radius: 10px;
+        margin: 10px auto;
+    }
+    #display-area{
+        background-color: #eeeeee;
+        height: 70px;
+        width: 95%;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        padding: 5px;
+        align-items: center;
+        font-size: 1.5rem;
+    }
+    .calculator-row{
+        margin: 5px auto;
+    
+    }
+    .calculator-row button{
+        width: 60px;
+        height: 50px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 5px;
+        margin: 5px;
+        background-color: #76ABAE;
+        color: #EEEEEE;
+        transition: 0.3s;
+    }
+    .calculator-row button:hover{
+        background-color: #eeeeee;
+        color:#31363F ;
+        cursor: pointer;
+    }
+}
+
+
