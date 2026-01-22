@@ -1,25 +1,170 @@
 // ==========================================
-// حاسبة الستائر الاحترافية - الفارس للديكور
-// كود الجافا سكريبت الكامل (Calculators Logic)
+// 🧮 ملف منطق الحاسبة + الطباعة (Curtain Calculator & Invoice)
 // ==========================================
 
+// متغيرات عامة للحالة
+let currentTransactionState = { selectedClient: null, totalAmount: 0 };
+let carpetSelectedClient = null;
+let wallSelectedClient = null;
+
+// مصفوفات البيانات
+let curtainData = { 1: { layers: [] } };
+let carpetRooms = [];
+let wallpaperRooms = [];
 let curtainCounter = 1;
 
 // ============================================================
-// 1. منطق حاسبة الستائر (Curtain Logic)
+// 🛠️ دالة مساعدة لتوليد الرقم المسلسل الذكي (YYMMDDxxx)
 // ============================================================
+function generateSmartID(offset = 0) {
+  const now = new Date();
+  const prefix = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  let count = 1;
+  if (typeof orders !== "undefined" && Array.isArray(orders)) {
+    count =
+      orders.filter((o) => String(o.id).startsWith(prefix)).length + 1 + offset;
+  }
+  return `${prefix}${String(count).padStart(3, "0")}`;
+}
 
-// وظيفة إضافة ستارة جديدة
+// ============================================================
+// 1. دوال البحث واختيار العميل
+// ============================================================
+function handlePhoneSearch(val) {
+  genericSearch(val, "search-results-dropdown", selectClient);
+}
+function handleCarpetSearch(val) {
+  genericSearch(val, "carpet-search-results", selectCarpetClient);
+}
+function handleWallSearch(val) {
+  genericSearch(val, "wall-search-results", selectWallClient);
+}
+
+function genericSearch(val, dropdownId, selectCallback) {
+  const list = document.getElementById(dropdownId);
+  list.innerHTML = "";
+  const cleanVal = val.replace(/[^0-9]/g, "");
+
+  if (cleanVal.length < 2) {
+    list.style.display = "none";
+    return;
+  }
+
+  const matched = customers.filter((c) => String(c.phone).includes(cleanVal));
+
+  if (matched.length > 0) {
+    list.style.display = "block";
+    matched.forEach((c) => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.innerHTML = `<span>${c.name}</span><span dir="ltr">${c.phone}</span>`;
+      item.onclick = () => {
+        selectCallback(c);
+        list.style.display = "none";
+      };
+      list.appendChild(item);
+    });
+  } else {
+    list.style.display = "block";
+    const addText =
+      typeof t === "function" ? t("quick_add_title") : "+ إضافة عميل جديد";
+    list.innerHTML = `<div class="dropdown-item" onclick="openQuickAddWithPhone('${cleanVal}')" style="color:var(--gold); font-weight:bold; cursor:pointer;">${addText}</div>`;
+  }
+}
+
+function selectClient(c) {
+  currentTransactionState.selectedClient = c;
+  updateClientCard(
+    "selected-client-card",
+    "search-box-container",
+    "selected-client-name",
+    "selected-client-phone",
+    "btn-save-transaction",
+    c,
+  );
+}
+function selectCarpetClient(c) {
+  carpetSelectedClient = c;
+  updateClientCard(
+    "carpet-selected-client-card",
+    "carpet-search-box-container",
+    "carpet-client-name",
+    "carpet-client-phone",
+    "btn-save-carpet",
+    c,
+  );
+}
+function selectWallClient(c) {
+  wallSelectedClient = c;
+  updateClientCard(
+    "wall-selected-client-card",
+    "wall-search-box-container",
+    "wall-client-name",
+    "wall-client-phone",
+    "btn-save-wall",
+    c,
+  );
+}
+
+function updateClientCard(cardId, searchId, nameId, phoneId, btnId, c) {
+  document.getElementById(searchId).style.display = "none";
+  document.getElementById(cardId).style.display = "flex";
+  document.getElementById(nameId).innerText = c.name;
+  document.getElementById(phoneId).innerText = c.phone;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = false;
+}
+
+function resetClientSelection() {
+  genericReset(
+    "selected-client-card",
+    "search-box-container",
+    "btn-save-transaction",
+  );
+  currentTransactionState.selectedClient = null;
+}
+function resetCarpetClientSelection() {
+  genericReset(
+    "carpet-selected-client-card",
+    "carpet-search-box-container",
+    "btn-save-carpet",
+  );
+  carpetSelectedClient = null;
+}
+function resetWallClientSelection() {
+  genericReset(
+    "wall-selected-client-card",
+    "wall-search-box-container",
+    "btn-save-wall",
+  );
+  wallSelectedClient = null;
+}
+
+function genericReset(cardId, searchId, btnId) {
+  document.getElementById(cardId).style.display = "none";
+  document.getElementById(searchId).style.display = "block";
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = true;
+}
+
+// ============================================================
+// 2. منطق حاسبة الستائر
+// ============================================================
 function addCurtain() {
   curtainCounter++;
   const wrapper = document.getElementById("curtains-wrapper");
-  // تم إضافة data-lang-ph عشان الترجمة تشتغل في العناصر الجديدة
+
   const newCurtain = `
         <div class="curtain-card" data-curtain-id="${curtainCounter}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>ستارة رقم ${curtainCounter}</h3>
-                <button class="danger-btn" onclick="this.closest('.curtain-card').remove()">حذف الستارة ×</button>
+                <h3><span data-lang="curtain_num">ستارة رقم</span> ${curtainCounter}</h3>
+                <button class="danger-btn" onclick="this.closest('.curtain-card').remove()">×</button>
             </div>
+            
+            <div class="inputs-grid" style="margin-bottom: 10px;">
+                <input type="text" class="c-room-name" data-lang-ph="ph_room_name" placeholder="اسم الغرفة" style="border: 1px solid var(--gold); background: rgba(211, 187, 96, 0.1); width: 100%;">
+            </div>
+
             <div class="inputs-grid">
                 <input type="number" class="c-width" required data-lang-ph="ph_width" placeholder="عرض الستارة (سم)">
                 <input type="number" class="c-height" required data-lang-ph="ph_height" placeholder="ارتفاع الستارة (سم)">
@@ -33,7 +178,7 @@ function addCurtain() {
             <hr>
             <div class="layers-wrapper">
                 <div class="layer-card" data-layer-id="1">
-                    <h4>طبقة 1</h4>
+                    <h4 data-lang="layer_1">طبقة 1</h4>
                     <div class="inputs-grid">
                         <input type="text" class="l-name" required data-lang-ph="ph_layer_name" placeholder="اسم الطبقة">
                         <input type="number" class="l-fab-width" required data-lang-ph="ph_fab_width" placeholder="عرض القماش (سم)">
@@ -42,26 +187,23 @@ function addCurtain() {
                     </div>
                     <div class="inputs-grid">
                         <select class="l-rail-type" required>
-                            <option value="">نوع الريل</option>
-                            <option>ريل عادي</option><option>ريل ويفي</option><option>ريل امريكي</option>
-                            <option>ريل روماني</option><option>ريل استيل</option><option>ريل خشب</option>
+                            <option value="" data-lang="sel_rail_type">نوع الريل</option>
+                            <option>ريل عادي</option><option>ريل ويفي</option><option>ريل امريكي</option><option>ريل روماني</option><option>ريل استيل</option><option>ريل خشب</option>
                         </select>
                         <input type="number" class="l-rail-price" required data-lang-ph="ph_rail_price" placeholder="سعر متر الريل">
                     </div>
                     <div class="layer-actions">
-                        <button class="secondary-btn" onclick="addLayer('${curtainCounter}')">إضافة طبقة</button>
-                        <button class="danger-btn" onclick="removeLayer(this)">حذف الطبقة</button>
+                        <button class="secondary-btn" onclick="addLayer('${curtainCounter}')" data-lang="btn_add_layer">إضافة طبقة</button>
+                        <button class="danger-btn" onclick="removeLayer(this)" data-lang="btn_del_layer">حذف الطبقة</button>
                     </div>
                 </div>
             </div>
         </div>`;
+
   wrapper.insertAdjacentHTML("beforeend", newCurtain);
-  // إعادة تطبيق اللغة (لو موجودة)
-  if (typeof applyLanguage === "function")
-    applyLanguage(localStorage.getItem("lang") || "ar");
+  if (typeof applyLanguage === "function") applyLanguage(currentLang);
 }
 
-// وظيفة إضافة طبقة
 function addLayer(curtainId) {
   const curtainCard = document.querySelector(
     `.curtain-card[data-curtain-id="${curtainId}"]`,
@@ -71,7 +213,7 @@ function addLayer(curtainId) {
 
   const layerHtml = `
         <div class="layer-card" data-layer-id="${layerId}">
-            <h4>طبقة ${layerId}</h4>
+            <h4><span data-lang="ph_layer_name">طبقة</span> ${layerId}</h4>
             <div class="inputs-grid">
                 <input type="text" class="l-name" required data-lang-ph="ph_layer_name" placeholder="اسم الطبقة">
                 <input type="number" class="l-fab-width" required data-lang-ph="ph_fab_width" placeholder="عرض القماش (سم)">
@@ -79,29 +221,34 @@ function addLayer(curtainId) {
                 <input type="number" class="l-gather" required data-lang-ph="ph_gather" placeholder="الكرمشة">
             </div>
             <div class="inputs-grid">
-                <select class="l-rail-type" required><option value="">نوع الريل</option><option>ريل عادي</option><option>ريل ويفي</option><option>ريل امريكي</option><option>ريل روماني</option><option>ريل استيل</option><option>ريل خشب</option></select>
+                <select class="l-rail-type" required>
+                    <option value="" data-lang="sel_rail_type">نوع الريل</option>
+                    <option>ريل عادي</option><option>ريل ويفي</option><option>ريل امريكي</option><option>ريل روماني</option><option>ريل استيل</option><option>ريل خشب</option>
+                </select>
                 <input type="number" class="l-rail-price" required data-lang-ph="ph_rail_price" placeholder="سعر متر الريل">
             </div>
             <div class="layer-actions">
-                <button class="danger-btn" onclick="removeLayer(this)">حذف الطبقة</button>
+                <button class="danger-btn" onclick="removeLayer(this)" data-lang="btn_del_layer">حذف الطبقة</button>
             </div>
         </div>`;
+
   layersWrapper.insertAdjacentHTML("beforeend", layerHtml);
-  if (typeof applyLanguage === "function")
-    applyLanguage(localStorage.getItem("lang") || "ar");
+  if (typeof applyLanguage === "function") applyLanguage(currentLang);
 }
 
-// وظيفة حذف طبقة
 function removeLayer(btn) {
   const layers = btn.closest(".layers-wrapper");
   if (layers.children.length > 1) {
     btn.closest(".layer-card").remove();
   } else {
-    alert("يجب وجود طبقة واحدة على الأقل!");
+    alert(
+      typeof t === "function"
+        ? "Layer Required"
+        : "يجب وجود طبقة واحدة على الأقل!",
+    );
   }
 }
 
-// دالة حساب الستائر (تم التصحيح هنا ✅)
 function calculateCurtains() {
   let orderGrandTotal = 0;
   const allCurtains = document.querySelectorAll(".curtain-card");
@@ -110,12 +257,13 @@ function calculateCurtains() {
   if (previewBody) previewBody.innerHTML = "";
 
   allCurtains.forEach((curtain) => {
-    // 🔥 التصحيح: استخدام Class Name بدلاً من Placeholder
+    const roomName =
+      curtain.querySelector(".c-room-name").value ||
+      `ستارة رقم ${curtain.dataset.curtainId || "1"}`;
     const width = parseFloat(curtain.querySelector(".c-width").value) || 0;
     const height = parseFloat(curtain.querySelector(".c-height").value) || 0;
     const sewingPrice =
       parseFloat(curtain.querySelector(".c-sewing-price").value) || 0;
-
     const tasselPrice =
       parseFloat(curtain.querySelector(".c-tassel-price").value) || 0;
     const sideHold =
@@ -127,7 +275,6 @@ function calculateCurtains() {
 
     const layers = curtain.querySelectorAll(".layer-card");
     layers.forEach((layer) => {
-      // 🔥 التصحيح: استخدام Class Name للطبقات أيضاً
       const lName = layer.querySelector(".l-name").value || "طبقة";
       const fabWidth =
         parseFloat(layer.querySelector(".l-fab-width").value) || 1;
@@ -150,11 +297,8 @@ function calculateCurtains() {
     });
 
     const sewingCost = (width / 100) * sewingPrice;
-    let tasselLen = Math.ceil(((height * 2) / 100) * 2) / 2;
-    const tasselCost = tasselLen * tasselPrice;
-
     const totalBeforeTax =
-      curtainSubTotal + sewingCost + tasselCost + sideHold + hook;
+      curtainSubTotal + sewingCost + tasselPrice + sideHold + hook;
     const finalCurtainTotal = totalBeforeTax * 1.05;
 
     orderGrandTotal += finalCurtainTotal;
@@ -162,10 +306,10 @@ function calculateCurtains() {
     if (previewBody) {
       const row = `
                 <tr>
-                    <td>ستارة رقم ${curtain.dataset.curtainId || "1"}</td>
-                    <td>${layers.length} طبقات</td>
+                    <td style="font-weight:bold; color:var(--gold);">${roomName}</td>
+                    <td>${layers.length}</td>
                     <td style="text-align: right;">${layersDetailsHtml}</td>
-                    <td style="font-weight:bold; color:#d3bb60;">${finalCurtainTotal.toFixed(2)} د.إ</td>
+                    <td style="font-weight:bold; color:#d3bb60;">${finalCurtainTotal.toFixed(2)}</td>
                 </tr>`;
       previewBody.insertAdjacentHTML("beforeend", row);
     }
@@ -179,352 +323,161 @@ function calculateCurtains() {
   }
 
   const salesEl = document.getElementById("total-sales-dash");
-  if (salesEl) salesEl.innerText = orderGrandTotal.toFixed(2) + " د.إ";
+  if (salesEl)
+    salesEl.innerText =
+      orderGrandTotal.toFixed(2) +
+      " " +
+      (typeof t === "function" ? t("currency") : "AED");
 
   const linkingArea = document.getElementById("customer-linking-area");
   if (linkingArea) {
     linkingArea.style.display = "block";
-    if (typeof currentTransactionState !== "undefined") {
-      currentTransactionState.totalAmount = orderGrandTotal;
-    }
+    currentTransactionState.totalAmount = orderGrandTotal;
     linkingArea.scrollIntoView({ behavior: "smooth" });
   }
 }
 
 // ============================================================
-// 2. منطق البحث وربط العميل (مشترك للكل)
+// 3. 🔥 حفظ المعاملات
 // ============================================================
 
-let currentTransactionState = {
-  selectedClient: null,
-  totalAmount: 0,
-  details: "تفصيل ستائر",
-};
-
-// البحث برقم الهاتف
-function handlePhoneSearch(query) {
-  const dropdown = document.getElementById("search-results-dropdown");
-  dropdown.innerHTML = "";
-  const cleanNumber = query.replace(/[^0-9]/g, "");
-
-  if (cleanNumber.length < 3) {
-    dropdown.style.display = "none";
-    return;
-  }
-
-  const matches =
-    typeof customers !== "undefined"
-      ? customers.filter((c) => String(c.phone).includes(cleanNumber))
-      : [];
-  dropdown.style.display = "block";
-
-  if (matches.length > 0) {
-    matches.forEach((c) => {
-      const item = document.createElement("div");
-      item.className = "dropdown-item";
-      item.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#d3bb60;">${c.phone}</strong><span>${c.name}</span></div>`;
-      item.onclick = () => selectClient(c);
-      dropdown.appendChild(item);
-    });
-  } else {
-    dropdown.innerHTML = `<div class="dropdown-item add-new" onclick="openQuickAddWithPhone('${cleanNumber}')" style="cursor:pointer; color:#2ecc71; font-weight:bold;"><i class="fas fa-plus-circle"></i> رقم جديد؟ إضافة <span dir="ltr">${cleanNumber}</span></div>`;
-  }
-}
-
-// ============================================================
-// 3. دوال المودال وإضافة العميل السريع
-// ============================================================
-
-// تم نقل دوال المودال لتعمل بشكل سليم
-// (openQuickAddWithPhone, closeQuickAdd, saveQuickClient موجودة في script.js وتعمل بشكل مشترك)
-
-// اختيار العميل للستائر
-function selectClient(client) {
-  currentTransactionState.selectedClient = client;
-  document.getElementById("search-box-container").style.display = "none";
-  document.getElementById("search-results-dropdown").style.display = "none";
-  const card = document.getElementById("selected-client-card");
-  document.getElementById("selected-client-name").innerText = client.name;
-  document.getElementById("selected-client-phone").innerText = client.phone;
-  card.style.display = "flex";
-  const saveBtn = document.getElementById("btn-save-transaction");
-  if (saveBtn) {
-    saveBtn.disabled = false;
-    saveBtn.classList.add("pulse-anim");
-  }
-}
-
-function resetClientSelection() {
-  currentTransactionState.selectedClient = null;
-  document.getElementById("selected-client-card").style.display = "none";
-  document.getElementById("search-box-container").style.display = "block";
-  const searchInput = document.getElementById("client-search-input");
-  searchInput.value = "";
-  searchInput.focus();
-  document.getElementById("btn-save-transaction").disabled = true;
-}
-
+// أ. حفظ الستائر
 function saveTransactionToSheet() {
   const client = currentTransactionState.selectedClient;
-  const amount = currentTransactionState.totalAmount;
+  const allCurtains = document.querySelectorAll(".curtain-card");
 
-  if (!client || amount <= 0) {
-    alert("⚠️ تأكد من اختيار عميل وحساب الستائر أولاً!");
+  if (!client || allCurtains.length === 0) {
+    alert(
+      typeof t === "function"
+        ? t("no_orders")
+        : "تأكد من اختيار عميل وإضافة ستائر!",
+    );
     return;
   }
 
   const btn = document.getElementById("btn-save-transaction");
   const originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+  btn.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i> ' +
+    (typeof t === "function" ? t("saving") : "جاري الحفظ...");
   btn.disabled = true;
 
-  // استدعاء دالة التتبع من script.js لتوليد الرقم المسلسل
-  let trackingInfo = {
-    id: Date.now(),
-    date: new Date().toLocaleDateString("en-GB"),
-  };
-  if (typeof addNewOrderToTracking === "function") {
-    trackingInfo = addNewOrderToTracking(
-      client.name,
-      client.phone,
-      client.address,
-      "تفصيل ستائر",
-      amount,
-    );
-  }
+  const fetchPromises = [];
 
-  const transactionData = {
-    type: "transaction",
-    id: trackingInfo.id,
-    date: trackingInfo.date,
-    clientName: client.name,
-    clientPhone: client.clientPhone || client.phone,
-    clientAddress: client.address || "استلام من المعرض",
-    serviceType: "تفصيل ستائر",
-    total: amount,
-  };
+  allCurtains.forEach((curtain, index) => {
+    const roomName =
+      curtain.querySelector(".c-room-name").value || `Curtain ${index + 1}`;
+    const previewRow = document.querySelectorAll("#preview-body tr")[index];
+    let curtainPrice = 0;
+    if (previewRow)
+      curtainPrice = parseFloat(previewRow.cells[3].innerText) || 0;
 
-  if (typeof scriptURL !== "undefined") {
-    fetch(scriptURL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify(transactionData),
-    })
-      .then(() => {
-        alert(`✅ تم حفظ الفاتورة بنجاح للعميل: ${client.name}`);
-        btn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ';
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-        }, 3000);
-      })
-      .catch((err) => {
-        alert("❌ حدث خطأ أثناء الحفظ");
+    if (curtainPrice > 0) {
+      const smartID = generateSmartID(index);
+
+      if (typeof addNewOrderToTracking === "function") {
+        addNewOrderToTracking(
+          client.name,
+          client.phone,
+          client.address,
+          "Curtains",
+          curtainPrice,
+          roomName,
+        );
+      }
+
+      const transactionData = {
+        type: "transaction",
+        id: smartID,
+        date: new Date().toLocaleDateString("en-GB"),
+        clientName: client.name,
+        clientPhone: client.clientPhone || client.phone,
+        clientAddress: client.address || "استلام من المعرض",
+        serviceType: "تفصيل ستائر",
+        total: curtainPrice,
+        details: roomName,
+        password: CURRENT_PASSWORD,
+      };
+
+      if (typeof scriptURL !== "undefined") {
+        const p = fetch(scriptURL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(transactionData),
+        });
+        fetchPromises.push(p);
+      }
+    }
+  });
+
+  Promise.all(fetchPromises)
+    .then(() => {
+      alert(typeof t === "function" ? t("saved") : "تم الحفظ بنجاح!");
+      btn.innerHTML = "✅";
+      setTimeout(() => {
         btn.innerHTML = originalText;
         btn.disabled = false;
-      });
-  }
-}
-
-// وظيفة التنقل بين التابات
-function openTab(evt, tabName) {
-  const tabContents = document.getElementsByClassName("tab-content");
-  for (let i = 0; i < tabContents.length; i++) {
-    tabContents[i].style.display = "none";
-  }
-  const tabLinks = document.getElementsByClassName("tab-btn");
-  for (let i = 0; i < tabLinks.length; i++) {
-    tabLinks[i].classList.remove("active");
-  }
-  const selectedTab = document.getElementById(tabName);
-  if (selectedTab) {
-    selectedTab.style.display = "block";
-  }
-  if (evt && evt.currentTarget) {
-    evt.currentTarget.classList.add("active");
-  }
-}
-
-// ============================================================
-// 4. منطق حاسبة السجاد (Carpet Logic)
-// ============================================================
-
-let carpetRooms = [];
-let carpetSelectedClient = null;
-
-function addCarpetRoom() {
-  const nameInput = document.getElementById("carpet-room-name");
-  const widthInput = document.getElementById("carpet-width");
-  const lengthInput = document.getElementById("carpet-length");
-  const priceInput = document.getElementById("carpet-price");
-
-  const name = nameInput.value.trim();
-  const width = parseFloat(widthInput.value);
-  const length = parseFloat(lengthInput.value);
-  const price = parseFloat(priceInput.value);
-
-  if (!name || isNaN(width) || isNaN(length) || isNaN(price) || width <= 0) {
-    alert("⚠️ بيانات غير مكتملة");
-    return;
-  }
-
-  const area = width * length;
-  const finalPrice = area * price * 1.05;
-
-  carpetRooms.push({
-    id: Date.now(),
-    name: name,
-    area: area.toFixed(2),
-    price: price.toFixed(2),
-    final: finalPrice.toFixed(2),
-  });
-
-  renderCarpetTable();
-  nameInput.value = "";
-  widthInput.value = "";
-  lengthInput.value = "";
-  priceInput.value = "";
-  nameInput.focus();
-}
-
-function renderCarpetTable() {
-  const tbody = document.getElementById("carpet-body");
-  const previewArea = document.getElementById("carpet-preview-area");
-  const linkingArea = document.getElementById("carpet-linking-area");
-  const grandTotalEl = document.getElementById("carpet-grand-total");
-
-  tbody.innerHTML = "";
-  let totalSum = 0;
-
-  if (carpetRooms.length === 0) {
-    previewArea.style.display = "none";
-    linkingArea.style.display = "none";
-    return;
-  }
-
-  previewArea.style.display = "block";
-  linkingArea.style.display = "block";
-
-  carpetRooms.forEach((room, index) => {
-    totalSum += parseFloat(room.final);
-    const tr = `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${room.name}</td>
-                <td dir="ltr">${room.area} m²</td>
-                <td>${room.price}</td>
-                <td style="font-weight:bold; color:var(--gold);">${room.final} د.إ</td>
-                <td><button onclick="removeCarpetRoom(${room.id})" style="color:#e74c3c; background:none; border:none; cursor:pointer;"><i class="fas fa-trash-alt"></i></button></td>
-            </tr>`;
-    tbody.insertAdjacentHTML("beforeend", tr);
-  });
-
-  grandTotalEl.innerText = totalSum.toFixed(2);
-  previewArea.scrollIntoView({ behavior: "smooth" });
-}
-
-function removeCarpetRoom(id) {
-  if (confirm("حذف الغرفة؟")) {
-    carpetRooms = carpetRooms.filter((r) => r.id !== id);
-    renderCarpetTable();
-  }
-}
-
-function handleCarpetSearch(query) {
-  const dropdown = document.getElementById("carpet-search-results");
-  dropdown.innerHTML = "";
-  const cleanNumber = query.replace(/[^0-9]/g, "");
-
-  if (cleanNumber.length < 3) {
-    dropdown.style.display = "none";
-    return;
-  }
-
-  const matches =
-    typeof customers !== "undefined"
-      ? customers.filter((c) => String(c.phone).includes(cleanNumber))
-      : [];
-  dropdown.style.display = "block";
-
-  if (matches.length > 0) {
-    matches.forEach((c) => {
-      const item = document.createElement("div");
-      item.className = "dropdown-item";
-      item.innerHTML = `<div style="display:flex; justify-content:space-between;"><strong style="color:#d3bb60;">${c.phone}</strong><span>${c.name}</span></div>`;
-      item.onclick = () => selectCarpetClient(c);
-      dropdown.appendChild(item);
+      }, 3000);
+    })
+    .catch(() => {
+      alert(typeof t === "function" ? t("error") : "حدث خطأ");
+      btn.disabled = false;
+      btn.innerHTML = originalText;
     });
-  } else {
-    dropdown.innerHTML = `<div class="dropdown-item" onclick="openQuickAddWithPhone('${cleanNumber}')" style="color:#2ecc71; font-weight:bold;">+ إضافة ${cleanNumber}</div>`;
-  }
 }
 
-function selectCarpetClient(client) {
-  carpetSelectedClient = client;
-  document.getElementById("carpet-search-box-container").style.display = "none";
-  document.getElementById("carpet-search-results").style.display = "none";
-  document.getElementById("carpet-client-name").innerText = client.name;
-  document.getElementById("carpet-client-phone").innerText = client.phone;
-  document.getElementById("carpet-selected-client-card").style.display = "flex";
-  document.getElementById("btn-save-carpet").disabled = false;
-}
-
-function resetCarpetClientSelection() {
-  carpetSelectedClient = null;
-  document.getElementById("carpet-selected-client-card").style.display = "none";
-  document.getElementById("carpet-search-box-container").style.display =
-    "block";
-  document.getElementById("carpet-search-input").value = "";
-  document.getElementById("btn-save-carpet").disabled = true;
-}
-
+// ب. حفظ السجاد
 function saveCarpetTransaction() {
-  const totalAmount = parseFloat(
-    document.getElementById("carpet-grand-total").innerText,
-  );
-  if (!carpetSelectedClient || totalAmount <= 0) {
-    alert("بيانات ناقصة");
+  if (!carpetSelectedClient || carpetRooms.length === 0) {
+    alert(typeof t === "function" ? t("error") : "بيانات ناقصة");
     return;
   }
 
   const btn = document.getElementById("btn-save-carpet");
   const originalText = btn.innerHTML;
-  btn.innerHTML = "جاري الحفظ...";
+  btn.innerHTML = typeof t === "function" ? t("saving") : "جاري الحفظ...";
   btn.disabled = true;
 
-  // استدعاء دالة التتبع
-  let trackingInfo = {
-    id: Date.now(),
-    date: new Date().toLocaleDateString("en-GB"),
-  };
-  if (typeof addNewOrderToTracking === "function") {
-    trackingInfo = addNewOrderToTracking(
-      carpetSelectedClient.name,
-      carpetSelectedClient.phone,
-      carpetSelectedClient.address,
-      "بيع سجاد",
-      totalAmount,
-    );
-  }
+  const fetchPromises = [];
 
-  const transactionData = {
-    type: "transaction",
-    id: trackingInfo.id,
-    date: trackingInfo.date,
-    clientName: carpetSelectedClient.name,
-    clientPhone: carpetSelectedClient.phone,
-    clientAddress: carpetSelectedClient.address || "استلام من المعرض",
-    serviceType: "بيع سجاد",
-    total: totalAmount,
-  };
+  carpetRooms.forEach((room, index) => {
+    const smartID = generateSmartID(index);
 
-  fetch(scriptURL, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(transactionData),
-  }).then(() => {
-    alert(`✅ تم الحفظ للعميل: ${carpetSelectedClient.name}`);
-    btn.innerHTML = "تم الحفظ";
+    if (typeof addNewOrderToTracking === "function") {
+      addNewOrderToTracking(
+        carpetSelectedClient.name,
+        carpetSelectedClient.phone,
+        carpetSelectedClient.address,
+        "Carpet",
+        room.final,
+        `${room.name} (${room.area}m²)`,
+      );
+    }
+
+    const data = {
+      type: "transaction",
+      id: smartID,
+      date: new Date().toLocaleDateString("en-GB"),
+      clientName: carpetSelectedClient.name,
+      clientPhone: carpetSelectedClient.phone,
+      clientAddress: carpetSelectedClient.address || "استلام من المعرض",
+      serviceType: "بيع سجاد",
+      total: room.final,
+      details: `${room.name} (${room.area}m²)`,
+      password: CURRENT_PASSWORD,
+    };
+
+    const p = fetch(scriptURL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(data),
+    });
+    fetchPromises.push(p);
+  });
+
+  Promise.all(fetchPromises).then(() => {
+    alert(typeof t === "function" ? t("saved") : "تم الحفظ");
+    btn.innerHTML = "✅";
     setTimeout(() => {
       btn.innerHTML = originalText;
       btn.disabled = false;
@@ -532,288 +485,114 @@ function saveCarpetTransaction() {
   });
 }
 
-function exportCarpetPDF() {
-  const element = document.getElementById("carpet-preview-area");
-  if (element.style.display === "none") {
-    alert("لا توجد بيانات");
-    return;
-  }
-  html2pdf()
-    .set({
-      margin: 0.5,
-      filename: "عرض_سعر_سجاد.pdf",
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4" },
-    })
-    .from(element)
-    .save();
-}
-
-// ============================================================
-// 5. منطق حاسبة ورق الجدران (Wallpaper Logic)
-// ============================================================
-
-let wallpaperRooms = [];
-let wallSelectedClient = null;
-
-function addWallInput() {
-  const container = document.getElementById("walls-container");
-  const count = container.children.length + 1;
-  const div = document.createElement("div");
-  div.className = "wall-row inputs-grid";
-  div.innerHTML = `<input type="text" class="wall-name" placeholder="اسم الجدار" value="جدار ${count}"><input type="number" class="wall-width" placeholder="عرض الجدار (سم) *"><button class="danger-btn remove-wall-btn" onclick="removeWallInput(this)">×</button>`;
-  container.appendChild(div);
-}
-
-function removeWallInput(btn) {
-  btn.parentElement.remove();
-}
-
-function calculateWallpaperRoom() {
-  const roomName = document.getElementById("wall-room-name").value.trim();
-  const wallHeight = parseFloat(document.getElementById("wall-height").value);
-  const rollWidth = parseFloat(document.getElementById("roll-width").value);
-  const rollLength = parseFloat(document.getElementById("roll-length").value);
-  const rollRepeat =
-    parseFloat(document.getElementById("roll-repeat").value) || 0;
-  const rollPrice = parseFloat(document.getElementById("roll-price").value);
-
-  if (
-    !roomName ||
-    isNaN(wallHeight) ||
-    isNaN(rollWidth) ||
-    isNaN(rollLength) ||
-    isNaN(rollPrice)
-  ) {
-    alert("بيانات ناقصة");
-    return;
-  }
-
-  let totalWallsWidth = 0;
-  let wallsCount = 0;
-  document.querySelectorAll(".wall-width").forEach((input) => {
-    const val = parseFloat(input.value);
-    if (!isNaN(val) && val > 0) {
-      totalWallsWidth += val;
-      wallsCount++;
-    }
-  });
-
-  if (wallsCount === 0) {
-    alert("أضف جداراً واحداً على الأقل");
-    return;
-  }
-
-  const stripLength = wallHeight + 10 + rollRepeat;
-  if (rollLength < stripLength) {
-    alert("طول الرول لا يكفي!");
-    return;
-  }
-
-  const stripsNeeded = Math.ceil(totalWallsWidth / rollWidth);
-  const stripsPerRoll = Math.floor(rollLength / stripLength);
-  const rollsNeeded = Math.ceil(stripsNeeded / stripsPerRoll);
-  const finalPrice = rollsNeeded * rollPrice * 1.05;
-
-  wallpaperRooms.push({
-    id: Date.now(),
-    name: roomName,
-    wallsCount,
-    totalWidth: totalWallsWidth,
-    rolls: rollsNeeded,
-    final: finalPrice.toFixed(2),
-  });
-  renderWallTable();
-}
-
-function renderWallTable() {
-  const tbody = document.getElementById("wall-body");
-  const previewArea = document.getElementById("wall-preview-area");
-  const linkingArea = document.getElementById("wall-linking-area");
-  tbody.innerHTML = "";
-  let totalRolls = 0;
-  let totalMoney = 0;
-
-  if (wallpaperRooms.length === 0) {
-    previewArea.style.display = "none";
-    linkingArea.style.display = "none";
-    return;
-  }
-
-  previewArea.style.display = "block";
-  linkingArea.style.display = "block";
-
-  wallpaperRooms.forEach((room) => {
-    totalRolls += room.rolls;
-    totalMoney += parseFloat(room.final);
-    tbody.insertAdjacentHTML(
-      "beforeend",
-      `<tr><td>-</td><td>${room.name}</td><td>${room.wallsCount}</td><td>${room.totalWidth}</td><td>${room.rolls}</td><td>${room.final}</td><td><button onclick="removeWallRoom(${room.id})" style="color:red;border:none;background:none;">×</button></td></tr>`,
-    );
-  });
-
-  document.getElementById("wall-total-rolls").innerText = totalRolls;
-  document.getElementById("wall-grand-total").innerText = totalMoney.toFixed(2);
-  previewArea.scrollIntoView({ behavior: "smooth" });
-}
-
-function removeWallRoom(id) {
-  if (confirm("حذف؟")) {
-    wallpaperRooms = wallpaperRooms.filter((r) => r.id !== id);
-    renderWallTable();
-  }
-}
-
-function handleWallSearch(query) {
-  const dropdown = document.getElementById("wall-search-results");
-  dropdown.innerHTML = "";
-  const cleanNumber = query.replace(/[^0-9]/g, "");
-  if (cleanNumber.length < 3) {
-    dropdown.style.display = "none";
-    return;
-  }
-  const matches =
-    typeof customers !== "undefined"
-      ? customers.filter((c) => String(c.phone).includes(cleanNumber))
-      : [];
-  dropdown.style.display = "block";
-  if (matches.length > 0) {
-    matches.forEach((c) => {
-      const item = document.createElement("div");
-      item.className = "dropdown-item";
-      item.innerHTML = `<strong>${c.phone}</strong> ${c.name}`;
-      item.onclick = () => selectWallClient(c);
-      dropdown.appendChild(item);
-    });
-  } else {
-    dropdown.innerHTML = `<div class="dropdown-item" onclick="openQuickAddWithPhone('${cleanNumber}')">+ إضافة</div>`;
-  }
-}
-
-function selectWallClient(c) {
-  wallSelectedClient = c;
-  document.getElementById("wall-search-box-container").style.display = "none";
-  document.getElementById("wall-search-results").style.display = "none";
-  document.getElementById("wall-client-name").innerText = c.name;
-  document.getElementById("wall-client-phone").innerText = c.phone;
-  document.getElementById("wall-selected-client-card").style.display = "flex";
-  document.getElementById("btn-save-wall").disabled = false;
-}
-
-function resetWallClientSelection() {
-  wallSelectedClient = null;
-  document.getElementById("wall-selected-client-card").style.display = "none";
-  document.getElementById("wall-search-box-container").style.display = "block";
-  document.getElementById("wall-search-input").value = "";
-  document.getElementById("btn-save-wall").disabled = true;
-}
-
+// ج. حفظ ورق الجدران
 function saveWallTransaction() {
-  const totalAmount = parseFloat(
-    document.getElementById("wall-grand-total").innerText,
-  );
-  if (!wallSelectedClient || totalAmount <= 0) {
-    alert("بيانات ناقصة");
+  if (!wallSelectedClient || wallpaperRooms.length === 0) {
+    alert(typeof t === "function" ? t("error") : "بيانات ناقصة");
     return;
   }
   const btn = document.getElementById("btn-save-wall");
-  btn.innerHTML = "جاري الحفظ...";
+  const originalText = btn.innerHTML;
+  btn.innerHTML = typeof t === "function" ? t("saving") : "جاري الحفظ...";
   btn.disabled = true;
 
-  // استدعاء دالة التتبع
-  let trackingInfo = {
-    id: Date.now(),
-    date: new Date().toLocaleDateString("en-GB"),
-  };
-  if (typeof addNewOrderToTracking === "function") {
-    trackingInfo = addNewOrderToTracking(
-      wallSelectedClient.name,
-      wallSelectedClient.phone,
-      wallSelectedClient.address,
-      "ورق جدران",
-      totalAmount,
-    );
-  }
+  const fetchPromises = [];
 
-  const data = {
-    type: "transaction",
-    id: trackingInfo.id,
-    date: trackingInfo.date,
-    clientName: wallSelectedClient.name,
-    clientPhone: wallSelectedClient.phone,
-    clientAddress: wallSelectedClient.address || "استلام من المعرض",
-    serviceType: "ورق جدران",
-    total: totalAmount,
-  };
-  fetch(scriptURL, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(data),
-  }).then(() => {
-    alert("تم الحفظ");
-    btn.innerHTML = "تم";
+  wallpaperRooms.forEach((room, index) => {
+    const smartID = generateSmartID(index);
+
+    if (typeof addNewOrderToTracking === "function") {
+      addNewOrderToTracking(
+        wallSelectedClient.name,
+        wallSelectedClient.phone,
+        wallSelectedClient.address,
+        "Wallpaper",
+        room.final,
+        `${room.name} (${room.rolls} rolls)`,
+      );
+    }
+
+    const data = {
+      type: "transaction",
+      id: smartID,
+      date: new Date().toLocaleDateString("en-GB"),
+      clientName: wallSelectedClient.name,
+      clientPhone: wallSelectedClient.phone,
+      clientAddress: wallSelectedClient.address || "استلام من المعرض",
+      serviceType: "ورق جدران",
+      total: room.final,
+      details: `${room.name} (${room.rolls} Rolls)`,
+      password: CURRENT_PASSWORD,
+    };
+
+    const p = fetch(scriptURL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(data),
+    });
+    fetchPromises.push(p);
+  });
+
+  Promise.all(fetchPromises).then(() => {
+    alert(typeof t === "function" ? t("saved") : "تم الحفظ");
+    btn.innerHTML = "✅";
     setTimeout(() => {
+      btn.innerHTML = originalText;
       btn.disabled = false;
     }, 3000);
   });
 }
 
-function exportWallPDF() {
-  const element = document.getElementById("wall-preview-area");
-  if (element.style.display === "none") {
-    alert("لا توجد بيانات");
-    return;
-  }
-  html2pdf()
-    .set({
-      margin: 0.5,
-      filename: "عرض_سعر_ورق.pdf",
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4" },
-    })
-    .from(element)
-    .save();
-}
-
 // ============================================================
-// 🖨️ نظام توليد الفواتير (الإصلاح النهائي للصفحة البيضاء)
+// 4. الطباعة (PDF) - 🛠️ تم التعديل لحل مشكلة الشاشة البيضاء
 // ============================================================
-
 function generateProInvoice(type) {
   if (typeof html2pdf === "undefined") {
-    alert("⚠️ مكتبة الطباعة غير موجودة! تأكد من الاتصال بالإنترنت.");
+    alert("Error: PDF Library missing");
     return;
   }
 
-  let items = [];
-  let grandTotalAED = 0;
-  let client = null;
-  let titleText = "QUOTATION";
+  let client = null,
+    grandTotal = 0,
+    title = "QUOTATION",
+    items = [];
 
-  // --- (أ) تجميع البيانات ---
-
-  // 1. السجاد
-  if (type === "carpet") {
-    if (!carpetSelectedClient) {
-      alert("⚠️ اختر عميل للسجاد أولاً!");
-      return;
-    }
-    if (carpetRooms.length === 0) {
-      alert("⚠️ جدول السجاد فارغ!");
-      return;
-    }
-
+  if (type === "curtain") {
+    client = currentTransactionState.selectedClient;
+    grandTotal = parseFloat(currentTransactionState.totalAmount);
+    title = "CURTAINS QUOTATION";
+    const allCurtains = document.querySelectorAll(".curtain-card");
+    allCurtains.forEach((curtain, idx) => {
+      const roomName =
+        curtain.querySelector(".c-room-name").value || `Curtain #${idx + 1}`;
+      const row = document.querySelector(
+        `#preview-body tr:nth-child(${idx + 1})`,
+      );
+      const price = row ? parseFloat(row.cells[3].innerText) : 0;
+      let valBefore = price / 1.05;
+      let tax = price - valBefore;
+      items.push({
+        no: idx + 1,
+        desc: `Fabrication & Installation for: ${roomName}`,
+        size: "Custom",
+        unit: "Job",
+        qty: 1,
+        price: valBefore.toFixed(2),
+        amount: valBefore.toFixed(2),
+        tax: tax.toFixed(2),
+        gross: price.toFixed(2),
+      });
+    });
+  } else if (type === "carpet") {
     client = carpetSelectedClient;
-    grandTotalAED = parseFloat(
+    grandTotal = parseFloat(
       document.getElementById("carpet-grand-total").innerText,
     );
-    titleText = "CARPET QUOTATION";
-
+    title = "CARPET QUOTATION";
     carpetRooms.forEach((r, i) => {
       let gross = parseFloat(r.final);
-      let amountBefore = gross / 1.05;
-      let taxVal = gross - amountBefore;
-
+      let valBefore = gross / 1.05;
+      let tax = gross - valBefore;
       items.push({
         no: i + 1,
         desc: `Carpet: ${r.name}`,
@@ -821,153 +600,83 @@ function generateProInvoice(type) {
         unit: "Job",
         qty: 1,
         price: parseFloat(r.price).toFixed(2),
-        amount: amountBefore.toFixed(2),
-        tax: taxVal.toFixed(2),
+        amount: valBefore.toFixed(2),
+        tax: tax.toFixed(2),
         gross: gross.toFixed(2),
       });
     });
-  }
-  // 2. ورق الجدران
-  else if (type === "wall") {
-    if (!wallSelectedClient) {
-      alert("⚠️ اختر عميل للورق أولاً!");
-      return;
-    }
-    if (wallpaperRooms.length === 0) {
-      alert("⚠️ جدول الورق فارغ!");
-      return;
-    }
-
+  } else {
     client = wallSelectedClient;
-    grandTotalAED = parseFloat(
+    grandTotal = parseFloat(
       document.getElementById("wall-grand-total").innerText,
     );
-    titleText = "WALLPAPER QUOTATION";
-
+    title = "WALLPAPER QUOTATION";
     wallpaperRooms.forEach((r, i) => {
       let gross = parseFloat(r.final);
-      let amountBefore = gross / 1.05;
-      let taxVal = gross - amountBefore;
-      let unitPrice = (amountBefore / r.rolls).toFixed(2);
-
+      let valBefore = gross / 1.05;
+      let tax = gross - valBefore;
       items.push({
         no: i + 1,
-        desc: `Wallpaper: ${r.name} (${r.wallsCount} Walls)`,
+        desc: `Wallpaper: ${r.name}`,
         size: "Roll",
         unit: "Pcs",
         qty: r.rolls,
-        price: unitPrice,
-        amount: amountBefore.toFixed(2),
-        tax: taxVal.toFixed(2),
+        price: (valBefore / r.rolls).toFixed(2),
+        amount: valBefore.toFixed(2),
+        tax: tax.toFixed(2),
         gross: gross.toFixed(2),
       });
     });
   }
-  // 3. الستائر
-  else if (type === "curtain") {
-    if (
-      typeof currentTransactionState === "undefined" ||
-      !currentTransactionState.selectedClient
-    ) {
-      alert("⚠️ اختر عميل للستائر واحسب السعر أولاً!");
-      return;
-    }
-    client = currentTransactionState.selectedClient;
-    grandTotalAED = parseFloat(
-      document.getElementById("preview-grand-total").innerText,
-    );
-    titleText = "CURTAINS QUOTATION";
 
-    const rows = document.querySelectorAll("#preview-body tr");
-    rows.forEach((row, i) => {
-      const cols = row.querySelectorAll("td");
-      if (cols.length > 0) {
-        // محاولة استخراج القيمة الرقمية النظيفة من نص السعر (إزالة " د.إ")
-        let grossText = cols[3].innerText.replace(/[^0-9.]/g, "");
-        let gross = parseFloat(grossText);
-        let amountBefore = gross / 1.05;
-        let taxVal = gross - amountBefore;
-        items.push({
-          no: i + 1,
-          desc: `Curtain Item #${i + 1}`,
-          size: "Custom",
-          unit: "Pcs",
-          qty: 1,
-          price: amountBefore.toFixed(2),
-          amount: amountBefore.toFixed(2),
-          tax: taxVal.toFixed(2),
-          gross: gross.toFixed(2),
-        });
-      }
-    });
+  if (!client) {
+    alert(typeof t === "function" ? t("error") : "Select Client First");
+    return;
   }
 
-  // --- (ب) ملء الفاتورة (DOM) ---
-
-  document.getElementById("inv-type-title").innerText = titleText;
+  // ملء الفاتورة
+  document.getElementById("inv-type-title").innerText = title;
   document.getElementById("inv-no").innerText =
     "QT-" + Date.now().toString().slice(-6);
   document.getElementById("inv-date").innerText = new Date().toLocaleDateString(
     "en-GB",
   );
-
-  if (client) {
-    document.getElementById("inv-client-name").innerText = client.name;
-    document.getElementById("inv-client-phone").innerText = client.phone;
-    document.getElementById("inv-client-addr").innerText =
-      client.address || "Dubai, UAE";
-    const sigField =
-      document.getElementById("inv-sig-client") ||
-      document.getElementById("inv-sig-client-name");
-    if (sigField) sigField.innerText = client.name;
-  }
+  document.getElementById("inv-client-name").innerText = client.name;
+  document.getElementById("inv-client-phone").innerText = client.phone;
+  document.getElementById("inv-client-addr").innerText = client.address || "";
 
   const tbody = document.getElementById("inv-table-body");
   tbody.innerHTML = "";
-
   items.forEach((item) => {
-    tbody.innerHTML += `
-            <tr>
-                <td>${item.no}</td>
-                <td style="text-align:left;">${item.desc}</td>
-                <td>${item.size}</td>
-                <td>${item.unit}</td>
-                <td>${item.qty}</td>
-                <td>${item.price}</td>
-                <td>${item.amount}</td>
-                <td>${item.tax}</td>
-                <td style="font-weight:bold;">${item.gross}</td>
-            </tr>`;
+    tbody.innerHTML += `<tr><td>${item.no}</td><td style="text-align:left">${item.desc}</td><td>${item.size}</td><td>${item.unit}</td><td>${item.qty}</td><td>${item.price}</td><td>${item.amount}</td><td>${item.tax}</td><td style="font-weight:bold;">${item.gross}</td></tr>`;
   });
 
-  let finalBefore = (grandTotalAED / 1.05).toFixed(2);
-  let finalTax = (grandTotalAED - finalBefore).toFixed(2);
+  let totalBefore = grandTotal / 1.05;
+  let totalTax = grandTotal - totalBefore;
+  document.getElementById("inv-total-before").innerText =
+    totalBefore.toFixed(2);
+  document.getElementById("inv-total-tax").innerText = totalTax.toFixed(2);
+  document.getElementById("inv-grand-total").innerText = grandTotal.toFixed(2);
 
-  document.getElementById("inv-total-before").innerText = finalBefore;
-  document.getElementById("inv-total-tax").innerText = finalTax;
-  document.getElementById("inv-grand-total").innerText =
-    grandTotalAED.toFixed(2);
-  document.getElementById("inv-words").innerText =
-    `Total: ${grandTotalAED.toFixed(2)} AED (Inclusive of 5% VAT)`;
-
-  // --- (ج) عملية الطباعة (Fix) ---
-
+  // إظهار وتجهيز الطباعة
   const element = document.getElementById("invoice-template");
   element.style.display = "block";
   element.style.position = "absolute";
   element.style.top = "0";
   element.style.left = "0";
   element.style.zIndex = "99999";
-  element.style.background = "white";
+  element.style.background = "white"; // ضمان خلفية بيضاء
 
+  // ✅ إعدادات الطباعة + تأخير زمني
   const opt = {
-    margin: 10,
-    filename: `${titleText}_${client.name}.pdf`,
+    margin: 0,
+    filename: `Quotation_${client.name}.pdf`,
     image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
   };
 
+  // ✅ الانتظار نصف ثانية لضمان الرسم
   setTimeout(() => {
     html2pdf()
       .set(opt)
@@ -975,10 +684,145 @@ function generateProInvoice(type) {
       .save()
       .then(() => {
         element.style.display = "none";
-      })
-      .catch((err) => {
-        console.error(err);
-        element.style.display = "none";
       });
   }, 500);
+}
+
+// ============================================================
+// 5. منطق حاسبة السجاد
+// ============================================================
+function addCarpetRoom() {
+  const name = document.getElementById("carpet-room-name").value;
+  const w = parseFloat(document.getElementById("carpet-width").value) || 0;
+  const l = parseFloat(document.getElementById("carpet-length").value) || 0;
+  const p = parseFloat(document.getElementById("carpet-price").value) || 0;
+
+  if (!name || w === 0) {
+    alert(typeof t === "function" ? t("error") : "Error");
+    return;
+  }
+
+  const area = w * l;
+  const finalPrice = area * p * 1.05;
+
+  carpetRooms.push({
+    id: Date.now(),
+    name,
+    area: area.toFixed(2),
+    price: p,
+    final: finalPrice.toFixed(2),
+  });
+  renderCarpetTable();
+
+  document.getElementById("carpet-room-name").value = "";
+  document.getElementById("carpet-width").value = "";
+  document.getElementById("carpet-length").value = "";
+  document.getElementById("carpet-price").value = "";
+}
+
+function renderCarpetTable() {
+  const tbody = document.getElementById("carpet-body");
+  tbody.innerHTML = "";
+  let totalSum = 0;
+
+  carpetRooms.forEach((room, index) => {
+    totalSum += parseFloat(room.final);
+    tbody.insertAdjacentHTML(
+      "beforeend",
+      `<tr><td>${index + 1}</td><td>${room.name}</td><td dir="ltr">${room.area} m²</td><td>${room.price}</td><td style="font-weight:bold; color:var(--gold);">${room.final}</td><td><button onclick="removeCarpetRoom(${room.id})" style="color:red;background:none;border:none;">×</button></td></tr>`,
+    );
+  });
+
+  document.getElementById("carpet-grand-total").innerText = totalSum.toFixed(2);
+  if (carpetRooms.length > 0) {
+    document.getElementById("carpet-preview-area").style.display = "block";
+    document.getElementById("carpet-linking-area").style.display = "block";
+  }
+}
+
+function removeCarpetRoom(id) {
+  if (confirm("Delete?")) {
+    carpetRooms = carpetRooms.filter((r) => r.id !== id);
+    renderCarpetTable();
+  }
+}
+
+// ============================================================
+// 6. منطق حاسبة ورق الجدران
+// ============================================================
+function addWallInput() {
+  const container = document.getElementById("walls-container");
+  const count = container.children.length + 1;
+  const div = document.createElement("div");
+  div.className = "wall-row inputs-grid";
+  div.innerHTML = `<input type="text" class="wall-name" placeholder="Wall ${count}" value="Wall ${count}"><input type="number" class="wall-width" data-lang-ph="ph_wall_width" placeholder="عرض الجدار"><button class="danger-btn remove-wall-btn" onclick="this.parentElement.remove()">×</button>`;
+  container.appendChild(div);
+
+  if (typeof applyLanguage === "function") applyLanguage(currentLang);
+}
+
+function removeWallInput(btn) {
+  btn.parentElement.remove();
+}
+
+function calculateWallpaperRoom() {
+  const roomName = document.getElementById("wall-room-name").value;
+  const h = parseFloat(document.getElementById("wall-height").value) || 0;
+  const rW = parseFloat(document.getElementById("roll-width").value) || 0;
+  const rL = parseFloat(document.getElementById("roll-length").value) || 0;
+  const price = parseFloat(document.getElementById("roll-price").value) || 0;
+
+  if (!roomName || h === 0 || rW === 0) {
+    alert(typeof t === "function" ? t("error") : "Error");
+    return;
+  }
+
+  let totalWidth = 0;
+  document
+    .querySelectorAll(".wall-width")
+    .forEach((inp) => (totalWidth += parseFloat(inp.value) || 0));
+
+  const strips = Math.ceil(totalWidth / rW);
+  const stripsPerRoll = Math.floor(rL / h);
+  const rolls = Math.ceil(strips / stripsPerRoll);
+  const finalPrice = rolls * price * 1.05;
+
+  wallpaperRooms.push({
+    id: Date.now(),
+    name: roomName,
+    totalWidth,
+    rolls,
+    final: finalPrice.toFixed(2),
+  });
+  renderWallTable();
+}
+
+function renderWallTable() {
+  const tbody = document.getElementById("wall-body");
+  tbody.innerHTML = "";
+  let total = 0,
+    rolls = 0;
+
+  wallpaperRooms.forEach((r) => {
+    total += parseFloat(r.final);
+    rolls += r.rolls;
+    tbody.insertAdjacentHTML(
+      "beforeend",
+      `<tr><td>-</td><td>${r.name}</td><td>-</td><td>${r.totalWidth}</td><td>${r.rolls}</td><td>${r.final}</td><td><button onclick="removeWallRoom(${r.id})" style="color:red;background:none;border:none;">×</button></td></tr>`,
+    );
+  });
+
+  document.getElementById("wall-grand-total").innerText = total.toFixed(2);
+  document.getElementById("wall-total-rolls").innerText = rolls;
+  if (wallpaperRooms.length > 0) {
+    document.getElementById("wall-preview-area").style.display = "block";
+    document.getElementById("wall-linking-area").style.display = "block";
+  }
+}
+
+function removeWallRoom(id) {
+  if (confirm("Delete?")) {
+    wallpaperRooms = wallpaperRooms.filter((r) => r.id !== id);
+    renderWallTable();
+  }
 }
