@@ -546,128 +546,265 @@ function saveWallTransaction() {
 // ============================================================
 // 4. الطباعة (PDF) - 🛠️ تم التعديل لحل مشكلة الشاشة البيضاء
 // ============================================================
+// ============================================================
+// 4. الطباعة (PDF QUOTATION ENGINE) - Corporate Version
+// ============================================================
 function generateProInvoice(type) {
   if (typeof html2pdf === "undefined") {
     alert("Error: PDF Library missing");
     return;
   }
 
-  let client = null,
-    grandTotal = 0,
-    title = "QUOTATION",
-    items = [];
+  let client = null;
+  let items = [];
+  let grandTotal = 0;
 
+  // 1. Curtain Logic - Detailed Breakdown
   if (type === "curtain") {
     client = currentTransactionState.selectedClient;
-    grandTotal = parseFloat(currentTransactionState.totalAmount);
-    title = "CURTAINS QUOTATION";
+    if (!client) {
+      alert(typeof t === "function" ? t("error") : "Select Client First");
+      return;
+    }
+
+    document.getElementById("inv-desc-title").innerText = "Curtains & Upholstery Works";
+
     const allCurtains = document.querySelectorAll(".curtain-card");
+    let serialNo = 1;
+
     allCurtains.forEach((curtain, idx) => {
-      const roomName =
-        curtain.querySelector(".c-room-name").value || `Curtain #${idx + 1}`;
-      const row = document.querySelector(
-        `#preview-body tr:nth-child(${idx + 1})`,
-      );
-      const price = row ? parseFloat(row.cells[3].innerText) : 0;
-      let valBefore = price / 1.05;
-      let tax = price - valBefore;
-      items.push({
-        no: idx + 1,
-        desc: `Fabrication & Installation for: ${roomName}`,
-        size: "Custom",
-        unit: "Job",
-        qty: 1,
-        price: valBefore.toFixed(2),
-        amount: valBefore.toFixed(2),
-        tax: tax.toFixed(2),
-        gross: price.toFixed(2),
+      const roomName = curtain.querySelector(".c-room-name").value || `Curtain ${idx + 1}`;
+      const wVal = parseFloat(curtain.querySelector(".c-width").value) || 0;
+      const hVal = parseFloat(curtain.querySelector(".c-height").value) || 0;
+
+      const wMtr = wVal / 100;
+      const hMtr = hVal / 100;
+
+      // --- Row 1: Header Row (Curtain Summary) ---
+      // We need to calculate total gross for this curtain first to show it in the header?
+      // Logic says: "Show the Total Gross Amount of the entire curtain here."
+      // So we might need to calculate layers first then sum it up.
+
+      let curtainItems = [];
+      let curtainTotalGross = 0;
+
+      // --- Layers (Fabric) ---
+      const layers = curtain.querySelectorAll(".layer-card");
+      layers.forEach((layer) => {
+        const lName = layer.querySelector(".l-name").value || "Fabric Layer";
+        const fabWidth = parseFloat(layer.querySelector(".l-fab-width").value) || 0;
+        const fabPrice = parseFloat(layer.querySelector(".l-fab-price").value) || 0;
+        const gather = parseFloat(layer.querySelector(".l-gather").value) || 1;
+        const railPrice = parseFloat(layer.querySelector(".l-rail-price").value) || 0;
+        const railType = layer.querySelector(".l-rail-type").value || "Normal Rail";
+
+        // Fabric Calculation
+        if (fabWidth > 0 && fabPrice > 0) {
+          const actualW = wVal + 20;
+          const gatheredW = actualW * gather;
+          const pieces = Math.ceil(gatheredW / fabWidth);
+          const actualH = (hVal + 20) / 100; // Meters
+          const qtyMtrs = pieces * actualH;
+
+          const amount = qtyMtrs * fabPrice;
+          const tax = amount * 0.05;
+          const gross = amount + tax;
+          curtainTotalGross += gross;
+
+          curtainItems.push({
+            desc: `Fabric: ${lName} (Ratio: ${gather})`,
+            sizeW: "-", sizeH: "-",
+            unit: "Mtr",
+            qty: qtyMtrs.toFixed(2),
+            price: fabPrice.toFixed(2),
+            amount: amount.toFixed(2),
+            taxAmt: tax.toFixed(2),
+            gross: gross.toFixed(2)
+          });
+        }
+
+        // Rail Calculation (Per Layer?) -> Usually distinct but logic says "Row 3: Rail Layer"
+        if (railPrice > 0) {
+          const amount = wMtr * railPrice;
+          const tax = amount * 0.05;
+          const gross = amount + tax;
+          curtainTotalGross += gross;
+
+          curtainItems.push({
+            desc: `Rail: ${railType}`,
+            sizeW: wMtr.toFixed(2), sizeH: "-",
+            unit: "Mtr",
+            qty: wMtr.toFixed(2),
+            price: railPrice.toFixed(2),
+            amount: amount.toFixed(2),
+            taxAmt: tax.toFixed(2),
+            gross: gross.toFixed(2)
+          });
+        }
       });
+
+      // --- Stitching (Sewing) ---
+      const sewingPrice = parseFloat(curtain.querySelector(".c-sewing-price").value) || 0;
+      if (sewingPrice > 0) {
+        const amount = wMtr * sewingPrice;
+        const tax = amount * 0.05;
+        const gross = amount + tax;
+        curtainTotalGross += gross;
+
+        curtainItems.push({
+          desc: "Stitching & Fixing",
+          sizeW: wMtr.toFixed(2), sizeH: "-",
+          unit: "Mtr",
+          qty: wMtr.toFixed(2),
+          price: sewingPrice.toFixed(2),
+          amount: amount.toFixed(2),
+          taxAmt: tax.toFixed(2),
+          gross: gross.toFixed(2)
+        });
+      }
+
+      // --- Accessories ---
+      const tasselPrice = parseFloat(curtain.querySelector(".c-tassel-price").value) || 0;
+      const sideHold = parseFloat(curtain.querySelector(".c-side-hold").value) || 0;
+      const hook = parseFloat(curtain.querySelector(".c-hook").value) || 0;
+      const accTotal = tasselPrice + sideHold + hook;
+
+      if (accTotal > 0) {
+        const amount = accTotal; // Assuming inputs are total price or unit? Logic says "Unit=Set, Qty=1"
+        // If inputs are "price per meter", this logic changes. 
+        // Previous code: totalBeforeTax = ... + tasselPrice + sideHold + hook; so they were treated as lump sums.
+        const tax = amount * 0.05;
+        const gross = amount + tax;
+        curtainTotalGross += gross;
+
+        curtainItems.push({
+          desc: "Accessories (Tassel/Hooks)",
+          sizeW: "-", sizeH: "-",
+          unit: "Set",
+          qty: "1.00",
+          price: amount.toFixed(2),
+          amount: amount.toFixed(2),
+          taxAmt: tax.toFixed(2),
+          gross: gross.toFixed(2)
+        });
+      }
+
+      grandTotal += curtainTotalGross;
+
+      // Push Header Row First
+      items.push({
+        no: serialNo++,
+        desc: `<b>${roomName}</b> - Opening Size`,
+        sizeW: wMtr.toFixed(2),
+        sizeH: hMtr.toFixed(2),
+        unit: "No",
+        qty: "1.00",
+        price: "-",
+        amount: "-",
+        taxAmt: "-",
+        gross: `<b>${curtainTotalGross.toFixed(2)}</b>`,
+        isHeader: true
+      });
+
+      // Push Details
+      items.push(...curtainItems);
     });
+
   } else if (type === "carpet") {
     client = carpetSelectedClient;
-    grandTotal = parseFloat(
-      document.getElementById("carpet-grand-total").innerText,
-    );
-    title = "CARPET QUOTATION";
+    if (!client) { alert("Select Client"); return; }
+    document.getElementById("inv-desc-title").innerText = "Carpet Works";
+
+    // Simple mapping for carpet
     carpetRooms.forEach((r, i) => {
-      let gross = parseFloat(r.final);
-      let valBefore = gross / 1.05;
-      let tax = gross - valBefore;
+      // r.price is Unit Price, r.final is Gross
+      const gross = parseFloat(r.final);
+      const amount = gross / 1.05; // Back calc
+      const tax = gross - amount;
+
       items.push({
         no: i + 1,
         desc: `Carpet: ${r.name}`,
-        size: `${r.area} m²`,
-        unit: "Job",
-        qty: 1,
+        sizeW: "-", sizeH: "-",
+        unit: "Sq.m",
+        qty: r.area, // Area as Qty
         price: parseFloat(r.price).toFixed(2),
-        amount: valBefore.toFixed(2),
-        tax: tax.toFixed(2),
-        gross: gross.toFixed(2),
+        amount: amount.toFixed(2),
+        taxAmt: tax.toFixed(2),
+        gross: gross.toFixed(2)
       });
+      grandTotal += gross;
     });
-  } else {
+
+  } else { // Wallpaper
     client = wallSelectedClient;
-    grandTotal = parseFloat(
-      document.getElementById("wall-grand-total").innerText,
-    );
-    title = "WALLPAPER QUOTATION";
+    if (!client) { alert("Select Client"); return; }
+    document.getElementById("inv-desc-title").innerText = "Wallpaper Works";
+
     wallpaperRooms.forEach((r, i) => {
-      let gross = parseFloat(r.final);
-      let valBefore = gross / 1.05;
-      let tax = gross - valBefore;
+      const gross = parseFloat(r.final);
+      const amount = gross / 1.05;
+      const tax = gross - amount;
+
       items.push({
         no: i + 1,
         desc: `Wallpaper: ${r.name}`,
-        size: "Roll",
-        unit: "Pcs",
+        sizeW: r.totalWidth, sizeH: "-", // Width logic varies
+        unit: "Rolls",
         qty: r.rolls,
-        price: (valBefore / r.rolls).toFixed(2),
-        amount: valBefore.toFixed(2),
-        tax: tax.toFixed(2),
-        gross: gross.toFixed(2),
+        price: (amount / r.rolls).toFixed(2), // Avg price per roll
+        amount: amount.toFixed(2),
+        taxAmt: tax.toFixed(2),
+        gross: gross.toFixed(2)
       });
+      grandTotal += gross;
     });
   }
 
-  if (!client) {
-    alert(typeof t === "function" ? t("error") : "Select Client First");
-    return;
-  }
+  // --- Render to HTML ---
+  const tbody = document.getElementById("inv-table-body");
+  tbody.innerHTML = "";
 
-  // ملء الفاتورة
-  document.getElementById("inv-type-title").innerText = title;
-  document.getElementById("inv-no").innerText =
-    "QT-" + Date.now().toString().slice(-6);
-  document.getElementById("inv-date").innerText = new Date().toLocaleDateString(
-    "en-GB",
-  );
+  items.forEach(item => {
+    const bgStyle = item.isHeader ? 'background-color:#f9f9f9;' : '';
+    const fontStyle = item.isHeader ? 'font-weight:bold;' : '';
+
+    tbody.innerHTML += `
+        <tr style="${bgStyle}">
+            <td style="text-align:center;">${item.no || '-'}</td>
+            <td class="desc-col">${item.desc}</td>
+            <td style="text-align:center;">${item.sizeW}</td>
+            <td style="text-align:center;">${item.sizeH}</td>
+            <td style="text-align:center;">${item.unit}</td>
+            <td style="text-align:center;">${item.qty}</td>
+            <td style="text-align:center;">${item.price}</td>
+            <td style="text-align:center;">${item.amount}</td>
+            <td style="text-align:center;">5%</td>
+            <td style="text-align:center;">${item.taxAmt}</td>
+            <td style="text-align:center; ${fontStyle}">${item.gross}</td>
+        </tr>
+      `;
+  });
+
+  // --- Header Data ---
+  document.getElementById("inv-no").innerText = "QT-" + Date.now().toString().slice(-6);
+  document.getElementById("inv-date").innerText = new Date().toLocaleDateString("en-GB");
   document.getElementById("inv-client-name").innerText = client.name;
   document.getElementById("inv-client-phone").innerText = client.phone;
   document.getElementById("inv-client-addr").innerText = client.address || "";
 
-  const tbody = document.getElementById("inv-table-body");
-  tbody.innerHTML = "";
-  items.forEach((item) => {
-    tbody.innerHTML += `<tr><td>${item.no}</td><td style="text-align:left">${item.desc}</td><td>${item.size}</td><td>${item.unit}</td><td>${item.qty}</td><td>${item.price}</td><td>${item.amount}</td><td>${item.tax}</td><td style="font-weight:bold;">${item.gross}</td></tr>`;
-  });
+  // --- Totals ---
+  const totalBefore = grandTotal / 1.05;
+  const totalTax = grandTotal - totalBefore;
 
-  let totalBefore = grandTotal / 1.05;
-  let totalTax = grandTotal - totalBefore;
-  document.getElementById("inv-total-before").innerText =
-    totalBefore.toFixed(2);
-  document.getElementById("inv-total-tax").innerText = totalTax.toFixed(2);
-  document.getElementById("inv-grand-total").innerText = grandTotal.toFixed(2);
+  document.getElementById("inv-total-before").innerText = totalBefore.toLocaleString(undefined, { minimumFractionDigits: 2 });
+  document.getElementById("inv-total-tax").innerText = totalTax.toLocaleString(undefined, { minimumFractionDigits: 2 });
+  document.getElementById("inv-grand-total").innerText = grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-  // إظهار وتجهيز الطباعة
+  // --- Generate PDF ---
   const element = document.getElementById("invoice-template");
-  element.style.display = "block";
-  element.style.position = "absolute";
-  element.style.top = "0";
-  element.style.left = "0";
-  element.style.zIndex = "99999";
-  element.style.background = "white"; // ضمان خلفية بيضاء
+  element.style.display = "block"; // Show for rendering
 
-  // ✅ إعدادات الطباعة + تأخير زمني
   const opt = {
     margin: 0,
     filename: `Quotation_${client.name}.pdf`,
@@ -676,14 +813,13 @@ function generateProInvoice(type) {
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
   };
 
-  // ✅ الانتظار نصف ثانية لضمان الرسم
   setTimeout(() => {
     html2pdf()
       .set(opt)
       .from(element)
       .save()
       .then(() => {
-        element.style.display = "none";
+        element.style.display = "none"; // Hide after save
       });
   }, 500);
 }

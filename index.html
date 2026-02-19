@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-  <head>
-    <!-- 
+
+<head>
+  <!-- 
       ============================================
       قسم إعدادات الصفحة الأساسية والميتاداتا
       ============================================
@@ -10,10 +11,11 @@
       - تعريف ترميز المحارف UTF-8 لدعم اللغة العربية
       - عنوان الصفحة مع خاصية data-lang للترجمة
     -->
-    <meta charset="UTF-8" />
-    <title data-lang="app_title">نظام الفارس للديكور | CRM</title>
+  <meta charset="UTF-8" />
+  <title data-lang="app_title">نظام الفارس للديكور | CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- 
+  <!-- 
       ============================================
       روابط مكتبات الخطوط الخارجية
       ============================================
@@ -21,643 +23,477 @@
       - خط Roboto للإنجليزية مع أوزان مختلفة
       - مكتبة Font Awesome للأيقونات
     -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;600;700&family=Roboto:wght@300;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;600;700&family=Roboto:wght@300;500;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- 
+  <!-- 
       ============================================
       روابط ملفات الأنماط الداخلية
       ============================================
       - style.css: الأنماط الرئيسية للتطبيق
       - invoice.css: أنماط خاصة بإنشاء الفواتير
     -->
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="invoice.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="invoice.css" />
 
-    <!-- 
+  <!-- 
       ============================================
       مكتبات JavaScript الخارجية
       ============================================
       - Chart.js: لإنشاء الرسوم البيانية والإحصائيات
       - html2pdf.js: لتحويل HTML إلى PDF لتنزيل الفواتير
     -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  </head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
 
-  <body>
-    <div id="login-overlay">
-      <div class="login-box">
-        <div class="logo-area" style="margin-bottom: 20px">
-          <h2 style="color: #fff; margin-top: 10px">نظام الفارس للمفروشات</h2>
-        </div>
-        <p style="color: #ccc; margin-bottom: 15px">
-          النظام محمي، أدخل كلمة المرور
-        </p>
-
-        <div class="input-group" style="margin-bottom: 20px">
-          <input
-            type="password"
-            id="admin-pass"
-            placeholder="Password"
-            onkeyup="if (event.key === 'Enter') checkLogin();"
-          />
-        </div>
-
-        <button
-          class="primary-btn gold"
-          onclick="checkLogin()"
-          style="width: 100%"
-        >
-          <i class="fas fa-unlock"></i> دخول آمن
-        </button>
-        <p
-          id="login-error"
-          style="color: #e74c3c; margin-top: 10px; display: none"
-        ></p>
+<body>
+  <div id="login-overlay">
+    <div class="login-box">
+      <div class="logo-area" style="margin-bottom: 20px">
+        <h2 style="color: #fff; margin-top: 10px">الفـــارس</h2>
       </div>
+      <p style="color: #ccc; margin-bottom: 15px">
+        النظام محمي، أدخل كلمة المرور
+      </p>
+
+      <div class="input-group" style="margin-bottom: 20px">
+        <input type="password" id="admin-pass" placeholder="Password"
+          onkeyup="if (event.key === 'Enter') checkLogin();" />
+      </div>
+
+      <button class="primary-btn gold" onclick="checkLogin()" style="width: 100%">
+        <i class="fas fa-unlock"></i> دخول آمن
+      </button>
+      <p id="login-error" style="color: #e74c3c; margin-top: 10px; display: none"></p>
     </div>
-    <!-- 
+  </div>
+  <!-- 
       ============================================
       الشريط الجانبي (Sidebar)
       ============================================
     -->
-    <aside class="sidebar">
-      <div class="logo-area">
-        <span data-lang="company_name">الفارس </span>
-      </div>
-      <nav class="side-nav">
-        <!-- رابط قسم الإحصائيات -->
-        <a
-          href="#"
-          class="active"
-          onclick="showSection('dashboard-section', this)"
-        >
-          <i class="fas fa-chart-pie"></i>
-          <span data-lang="nav_dashboard">الإحصائيات</span>
-        </a>
-        <!-- رابط قسم إدارة العملاء -->
-        <a href="#" onclick="showSection('customer-section', this)">
-          <i class="fas fa-users-cog"></i>
-          <span data-lang="nav_clients">إدارة العملاء</span>
-        </a>
-        <!-- رابط قسم الحاسبة الذكية -->
-        <a href="#" onclick="showSection('calc-section', this)">
-          <i class="fas fa-calculator"></i>
-          <span data-lang="nav_calc">الحاسبة الذكية</span>
-        </a>
-        <!-- رابط قسم المتابعة -->
-        <a href="#" onclick="showSection('tracking-section', this)">
-          <i class="fas fa-truck"></i>
-          <span data-lang="nav_tracking">المتابعة</span>
-        </a>
-
-        <!-- 
-          أزرار تبديل اللغة
-          ==================
-          - زر اللغة العربية
-          - زر اللغة الإنجليزية
-          - كل زر يستدعي دالة changeLanguage مع كود اللغة
-        -->
-        <div class="lang-switch">
-          <button onclick="changeLanguage('ar')">عربي</button>
-
-          <button onclick="changeLanguage('en')">English</button>
-        </div>
-      </nav>
-    </aside>
-
+  <aside class="sidebar">
+    <div class="logo-area">
+      <span data-lang="company_name">الفـــارس </span>
+    </div>
     <!-- 
+          قائمة التصفح الجانبية
+          =======================
+          - تحتوي على روابط الأقسام المختلفة
+          - يتم تفعيل الرابط النشط تلقائيًا
+        -->
+    <div class="side-nav">
+      <!-- رابط لوحة التحكم (الرئيسية/الاحصائيات) -->
+      <a href="#" class="active" onclick="showSection('dashboard-section', this)">
+        <i class="fas fa-chart-line"></i>
+        <span data-lang="nav_dashboard">الاحصائيات</span>
+      </a>
+
+      <!-- رابط إدارة العملاء -->
+      <a href="#" onclick="showSection('customer-section', this)">
+        <i class="fas fa-users"></i>
+        <span data-lang="nav_customers">العملاء</span>
+      </a>
+
+      <!-- رابط الآلة الحاسبة -->
+      <a href="#" onclick="showSection('calc-section', this)">
+        <i class="fas fa-calculator"></i>
+        <span data-lang="nav_calculator">الحاسبة</span>
+      </a>
+
+      <!-- رابط المتابعة -->
+      <a href="#" onclick="showSection('tracking-section', this)">
+        <i class="fas fa-tasks"></i>
+        <span data-lang="nav_tracking">المتابعة</span>
+      </a>
+    </div> <!-- زر اللغة الإنجليزية
+    - كل زر يستدعي دالة changeLanguage مع كود اللغة
+    -->
+    <div class="lang-switch">
+      <button onclick="changeLanguage('ar')">عربي</button>
+
+      <button onclick="changeLanguage('en')">English</button>
+    </div>
+    </nav>
+  </aside>
+
+  <!-- 
       ============================================
       المحتوى الرئيسي للتطبيق
       ============================================
     
     -->
-    <main class="main-content">
-      <!-- 
+  <main class="main-content">
+    <!-- Mobile Header (Visible only on small screens) -->
+    <div id="mobile-header" class="mobile-only-header glass no-print">
+      <div class="logo-area-mobile">
+        <h2>AL FARIS</h2>
+      </div>
+      <div class="lang-switch-mobile">
+        <button onclick="changeLanguage('ar')">ع</button>
+        <button onclick="changeLanguage('en')">En</button>
+      </div>
+    </div>
+
+    <!-- 
         ============================================
         قسم الإحصائيات (Dashboard)
         ============================================
-      
       -->
-      <section id="dashboard-section" class="page-section active">
-        <!-- 
+    <section id="dashboard-section" class="page-section active">
+      <!-- 
           شبكة بطاقات الإحصائيات
           ========================
         
         -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon gold">
-              <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <div class="stat-info">
-              <h3 data-lang="total_sales">إجمالي المبيعات</h3>
-              <p id="total-sales-dash">
-                0.00 <span data-lang="currency">د.إ</span>
-              </p>
-            </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon gold">
+            <i class="fas fa-money-bill-wave"></i>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
-            <div class="stat-info">
-              <h3 data-lang="clients_count">عدد العملاء</h3>
-              <p id="active-clients-dash">0</p>
-            </div>
+          <div class="stat-info">
+            <h3 data-lang="total_sales">إجمالي المبيعات</h3>
+            <p id="total-sales-dash">
+              0.00 <span data-lang="currency">د.إ</span>
+            </p>
           </div>
         </div>
-        <!-- 
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
+          <div class="stat-info">
+            <h3 data-lang="clients_count">عدد العملاء</h3>
+            <p id="active-clients-dash">0</p>
+          </div>
+        </div>
+      </div>
+      <!-- 
           صف الرسوم البيانية
           ===================
       
         -->
-        <div class="charts-row">
-          <div class="chart-box">
-            <h3 data-lang="chart_orders">مخطط الطلبات الشهري</h3>
-            <canvas id="ordersChart"></canvas>
-          </div>
-          <div class="chart-box">
-            <h3 data-lang="chart_services">توزيع الخدمات</h3>
-            <canvas id="servicesChart"></canvas>
-          </div>
+      <div class="charts-row">
+        <div class="chart-box">
+          <h3 data-lang="chart_orders">مخطط الطلبات الشهري</h3>
+          <canvas id="ordersChart"></canvas>
         </div>
-        <!-- 
+        <div class="chart-box">
+          <h3 data-lang="chart_services">توزيع الخدمات</h3>
+          <canvas id="servicesChart"></canvas>
+        </div>
+      </div>
+      <!-- 
           جدول أحدث العملاء
           ==================
        -->
-        <div class="recent-activity glass">
-          <h3 data-lang="recent_clients">أحدث عملاء</h3>
-          <table>
-            <thead>
-              <tr>
-                <th data-lang="th_date">التاريخ</th>
-                <th data-lang="th_name">الاسم</th>
-                <th data-lang="th_phone">الهاتف</th>
-                <th data-lang="th_addr">العنوان</th>
-              </tr>
-            </thead>
-            <tbody id="recent-customers-body"></tbody>
-          </table>
-        </div>
-      </section>
-      <!-- 
+      <div class="recent-activity glass">
+        <h3 data-lang="recent_clients">أحدث عملاء</h3>
+        <table>
+          <thead>
+            <tr>
+              <th data-lang="th_date">التاريخ</th>
+              <th data-lang="th_name">الاسم</th>
+              <th data-lang="th_phone">الهاتف</th>
+              <th data-lang="th_addr">العنوان</th>
+            </tr>
+          </thead>
+          <tbody id="recent-customers-body"></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- 
         ============================================
         قسم إدارة العملاء
         ============================================
      -->
-      <section id="customer-section" class="page-section">
-        <div class="section-header">
-          <!-- 
+    <section id="customer-section" class="page-section">
+      <div class="section-header">
+        <!-- 
             حقل البحث عن العملاء
             ======================
             - بحث بالاسم أو رقم الهاتف
             - يستدعي دالة searchCustomers أثناء الكتابة
           -->
-          <input
-            type="text"
-            id="search-input"
-            oninput="searchCustomers()"
-            data-lang-ph="search_ph"
-            placeholder="ابحث بالاسم أو رقم الهاتف..."
-          />
-        </div>
+        <input type="text" id="search-input" oninput="searchCustomers()" data-lang-ph="search_ph"
+          placeholder="ابحث بالاسم أو رقم الهاتف..." />
+      </div>
 
-        <!-- 
+      <!-- 
           نموذج إضافة عميل جديد
           =======================
     -->
-        <div class="form-container">
-          <div class="inputs-grid">
-            <input
-              type="text"
-              id="cust-name"
-              data-lang-ph="client_name_ph"
-              placeholder="اسم العميل *"
-              required
-            />
-            <div style="position: relative">
-              <input
-                type="tel"
-                id="cust-phone"
-                data-lang-ph="client_phone_ph"
-                placeholder="رقم الهاتف"
-                dir="ltr"
-                style="text-align: right"
-                maxlength="10"
-              />
-              <small id="phone-feedback"></small>
-            </div>
-            <input
-              type="text"
-              id="cust-address"
-              data-lang-ph="client_addr_ph"
-              placeholder="العنوان (اختياري)"
-            />
-            <input
-              type="text"
-              id="cust-notes"
-              data-lang-ph="client_notes_ph"
-              placeholder="ملاحظات"
-            />
+      <div class="form-container">
+        <div class="inputs-grid">
+          <input type="text" id="cust-name" data-lang-ph="client_name_ph" placeholder="اسم العميل *" required />
+          <div style="position: relative">
+            <input type="tel" id="cust-phone" data-lang-ph="client_phone_ph" placeholder="رقم الهاتف" dir="ltr"
+              style="text-align: right" maxlength="10" />
+            <small id="phone-feedback"></small>
           </div>
-          <!-- زر إضافة عميل جديد -->
-          <button
-            id="btn-save-cust"
-            class="primary-btn"
-            onclick="saveCustomerLocal()"
-            disabled
-            data-lang="add_client_btn"
-          >
-            إضافة عميل
-          </button>
+          <input type="text" id="cust-address" data-lang-ph="client_addr_ph" placeholder="العنوان (اختياري)" />
+          <input type="text" id="cust-notes" data-lang-ph="client_notes_ph" placeholder="ملاحظات" />
         </div>
+        <!-- زر إضافة عميل جديد -->
+        <button id="btn-save-cust" class="primary-btn" onclick="saveCustomerLocal()" disabled
+          data-lang="add_client_btn">
+          إضافة عميل
+        </button>
+      </div>
 
-        <!-- 
+      <!-- 
           جدول عرض جميع العملاء
           =======================
           - يعرض جميع العملاء المسجلين
           - يحتوي على أعمدة: الرقم التسلسلي، التاريخ، الاسم، الهاتف، العنوان
         -->
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th data-lang="th_date">التاريخ</th>
-                <th data-lang="th_name">الاسم</th>
-                <th data-lang="th_phone">الهاتف</th>
-                <th data-lang="th_addr">العنوان</th>
-              </tr>
-            </thead>
-            <tbody id="customers-body"></tbody>
-          </table>
-        </div>
-      </section>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-lang="th_date">التاريخ</th>
+              <th data-lang="th_name">الاسم</th>
+              <th data-lang="th_phone">الهاتف</th>
+              <th data-lang="th_addr">العنوان</th>
+            </tr>
+          </thead>
+          <tbody id="customers-body"></tbody>
+        </table>
+      </div>
+    </section>
 
-      <!-- 
+    <!-- 
         ============================================
         قسم الحاسبة الذكية
         ============================================
     
       -->
-      <section id="calc-section" class="page-section">
-        <!-- 
+    <section id="calc-section" class="page-section">
+      <!-- 
           أزرار التبويبات
           ================
         -->
-        <div class="tabs">
-          <button
-            class="tab-btn active"
-            onclick="openTab(event, 'curtain-tab')"
-            data-lang="tab_curtain"
-          >
-            حاسبة الستائر
-          </button>
-          <button
-            class="tab-btn"
-            onclick="openTab(event, 'carpet-tab')"
-            data-lang="tab_carpet"
-          >
-            حاسبة السجاد
-          </button>
-          <button
-            class="tab-btn"
-            onclick="openTab(event, 'wall-tab')"
-            data-lang="tab_wall"
-          >
-            حاسبة ورق الجدران
-          </button>
-        </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'curtain-tab')" data-lang="tab_curtain">
+          حاسبة الستائر
+        </button>
+        <button class="tab-btn" onclick="openTab(event, 'carpet-tab')" data-lang="tab_carpet">
+          حاسبة السجاد
+        </button>
+        <button class="tab-btn" onclick="openTab(event, 'wall-tab')" data-lang="tab_wall">
+          حاسبة ورق الجدران
+        </button>
+      </div>
 
-        <!-- 
+      <!-- 
           ============================================
           تبويب حاسبة الستائر
           ============================================
          
         -->
-        <div id="curtain-tab" class="tab-content" style="display: block">
-          <div id="curtain-calculator" class="calculator-wrapper">
-            <!-- 
+      <div id="curtain-tab" class="tab-content" style="display: block">
+        <div id="curtain-calculator" class="calculator-wrapper">
+          <!-- 
               منطقة إضافة الستائر
               ====================
               - يمكن إضافة عدة ستائر
               - كل ستارة لها بطاقة خاصة
             -->
-            <div id="curtains-wrapper">
-              <div class="curtain-card" data-curtain-id="1">
-                <!-- 
+          <div id="curtains-wrapper">
+            <div class="curtain-card" data-curtain-id="1">
+              <!-- 
                   معلومات الستارة الأساسية
                   =========================
                 -->
-                <div class="inputs-grid" style="margin-bottom: 10px">
-                  <input
-                    type="text"
-                    class="c-room-name"
-                    placeholder="اسم الغرفة (مثال: مجلس، صالة)"
-                  />
-                </div>
-                <div class="inputs-grid">
-                  <input
-                    type="number"
-                    class="c-width"
-                    required
-                    data-lang-ph="ph_width"
-                    placeholder="عرض الستارة (سم)"
-                  />
-                  <input
-                    type="number"
-                    class="c-height"
-                    required
-                    data-lang-ph="ph_height"
-                    placeholder="ارتفاع الستارة (سم)"
-                  />
-                  <input
-                    type="number"
-                    class="c-sewing-price"
-                    required
-                    data-lang-ph="ph_sewing"
-                    placeholder="سعر الخياطة"
-                  />
-                </div>
-                <div class="inputs-grid">
-                  <input
-                    type="number"
-                    class="c-tassel-price"
-                    data-lang-ph="ph_tassel"
-                    placeholder="سعر الطربوش"
-                  />
-                  <input
-                    type="number"
-                    class="c-side-hold"
-                    data-lang-ph="ph_sidehold"
-                    placeholder="سعر المسكة"
-                  />
-                  <input
-                    type="number"
-                    class="c-hook"
-                    data-lang-ph="ph_hook"
-                    placeholder="سعر المربط"
-                  />
-                </div>
+              <div class="inputs-grid" style="margin-bottom: 10px">
+                <input type="text" class="c-room-name" placeholder="اسم الغرفة (مثال: مجلس، صالة)" />
+              </div>
+              <div class="inputs-grid">
+                <input type="number" class="c-width" required data-lang-ph="ph_width" placeholder="عرض الستارة (سم)" />
+                <input type="number" class="c-height" required data-lang-ph="ph_height"
+                  placeholder="ارتفاع الستارة (سم)" />
+                <input type="number" class="c-sewing-price" required data-lang-ph="ph_sewing"
+                  placeholder="سعر الخياطة" />
+              </div>
+              <div class="inputs-grid">
+                <input type="number" class="c-tassel-price" data-lang-ph="ph_tassel" placeholder="سعر الطربوش" />
+                <input type="number" class="c-side-hold" data-lang-ph="ph_sidehold" placeholder="سعر المسكة" />
+                <input type="number" class="c-hook" data-lang-ph="ph_hook" placeholder="سعر المربط" />
+              </div>
 
-                <!-- 
+              <!-- 
                   منطقة الطبقات للستارة
                   =======================
                   - يمكن إضافة عدة طبقات للستارة الواحدة
                   - كل طبقة لها: اسم، عرض قماش، سعر قماش، نسبة الكرمشة
                   - نوع الريل: عادي، ويفي، أمريكي، روماني
                 -->
-                <div class="layers-wrapper">
-                  <div class="layer-card" data-layer-id="1">
-                    <h4 data-lang="layer_1">طبقة 1</h4>
-                    <div class="inputs-grid">
-                      <input
-                        type="text"
-                        class="l-name"
-                        required
-                        data-lang-ph="ph_layer_name"
-                        placeholder="اسم الطبقة"
-                      />
-                      <input
-                        type="number"
-                        class="l-fab-width"
-                        required
-                        data-lang-ph="ph_fab_width"
-                        placeholder="عرض القماش"
-                      />
-                      <input
-                        type="number"
-                        class="l-fab-price"
-                        required
-                        data-lang-ph="ph_fab_price"
-                        placeholder="سعر القماش"
-                      />
-                      <input
-                        type="number"
-                        class="l-gather"
-                        required
-                        data-lang-ph="ph_gather"
-                        placeholder="الكرمشة"
-                      />
-                    </div>
-                    <div class="inputs-grid">
-                      <select class="l-rail-type" required>
-                        <option value="" data-lang="sel_rail_type">
-                          نوع الريل *
-                        </option>
-                        <option value="ريل عادي">Normal Rail</option>
-                        <option value="ريل ويفي">Wave Rail</option>
-                        <option value="ريل امريكي">American Rail</option>
-                        <option value="ريل روماني">Roman Rail</option>
-                      </select>
-                      <input
-                        type="number"
-                        class="l-rail-price"
-                        required
-                        data-lang-ph="ph_rail_price"
-                        placeholder="سعر الريل"
-                      />
-                    </div>
-                    <!-- 
+              <div class="layers-wrapper">
+                <div class="layer-card" data-layer-id="1">
+                  <h4 data-lang="layer_1">طبقة 1</h4>
+                  <div class="inputs-grid">
+                    <input type="text" class="l-name" required data-lang-ph="ph_layer_name" placeholder="اسم الطبقة" />
+                    <input type="number" class="l-fab-width" required data-lang-ph="ph_fab_width"
+                      placeholder="عرض القماش" />
+                    <input type="number" class="l-fab-price" required data-lang-ph="ph_fab_price"
+                      placeholder="سعر القماش" />
+                    <input type="number" class="l-gather" required data-lang-ph="ph_gather" placeholder="الكرمشة" />
+                  </div>
+                  <div class="inputs-grid">
+                    <select class="l-rail-type" required>
+                      <option value="" data-lang="sel_rail_type">
+                        نوع الريل *
+                      </option>
+                      <option value="ريل عادي">Normal Rail</option>
+                      <option value="ريل ويفي">Wave Rail</option>
+                      <option value="ريل امريكي">American Rail</option>
+                      <option value="ريل روماني">Roman Rail</option>
+                    </select>
+                    <input type="number" class="l-rail-price" required data-lang-ph="ph_rail_price"
+                      placeholder="سعر الريل" />
+                  </div>
+                  <!-- 
                       أزرار إدارة الطبقات
                       ===================
                       - إضافة طبقة جديدة
                       - حذف الطبقة الحالية
                     -->
-                    <div class="layer-actions">
-                      <button
-                        class="secondary-btn"
-                        onclick="
+                  <div class="layer-actions">
+                    <button class="secondary-btn" onclick="
                           addLayer(
                             this.closest('.curtain-card').dataset.curtainId,
                           )
-                        "
-                        data-lang="btn_add_layer"
-                      >
-                        إضافة طبقة
-                      </button>
-                      <button
-                        class="danger-btn"
-                        onclick="removeLayer(this)"
-                        data-lang="btn_del_layer"
-                      >
-                        حذف الطبقة
-                      </button>
-                    </div>
+                        " data-lang="btn_add_layer">
+                      إضافة طبقة
+                    </button>
+                    <button class="danger-btn" onclick="removeLayer(this)" data-lang="btn_del_layer">
+                      حذف الطبقة
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة معاينة الحساب للستائر
               =============================
               - عرض جدول بملخص الحساب
               - عرض الإجمالي الكلي
             -->
-            <div
-              id="quick-preview-area"
-              class="preview-container glass"
-              style="display: none"
-            >
-              <h3 class="preview-title">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <span data-lang="quick_preview">معاينة الحساب</span>
-              </h3>
-              <div class="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th data-lang="th_curtain">الستارة</th>
-                      <th data-lang="th_layers">الطبقات</th>
-                      <th data-lang="th_total_fab">إجمالي القماش</th>
-                      <th data-lang="th_price_tax">السعر (مع الضريبة)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="preview-body"></tbody>
-                </table>
-              </div>
-              <div class="preview-summary">
-                <span data-lang="total_label">الإجمالي الكلي:</span>
-                <strong id="preview-grand-total">0.00</strong>
-                <span data-lang="currency">د.إ</span>
-              </div>
+          <div id="quick-preview-area" class="preview-container glass" style="display: none">
+            <h3 class="preview-title">
+              <i class="fas fa-file-invoice-dollar"></i>
+              <span data-lang="quick_preview">معاينة الحساب</span>
+            </h3>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-lang="th_curtain">الستارة</th>
+                    <th data-lang="th_layers">الطبقات</th>
+                    <th data-lang="th_total_fab">إجمالي القماش</th>
+                    <th data-lang="th_price_tax">السعر (مع الضريبة)</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-body"></tbody>
+              </table>
             </div>
+            <div class="preview-summary">
+              <span data-lang="total_label">الإجمالي الكلي:</span>
+              <strong id="preview-grand-total">0.00</strong>
+              <span data-lang="currency">د.إ</span>
+            </div>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة ربط العميل بالفاتورة (للستائر)
               =====================================
               - البحث عن عميل موجود برقم الهاتف
               - عرض العميل المختار
               - إمكانية تغيير العميل
             -->
-            <div
-              id="customer-linking-area"
-              class="linking-section glass"
-              style="display: none; margin-top: 20px"
-            >
-              <!-- بطاقة العميل المختار -->
-              <div
-                id="selected-client-card"
-                class="selected-client-box"
-                style="display: none"
-              >
-                <div class="client-info">
-                  <span class="icon"><i class="fas fa-user-check"></i></span>
-                  <div>
-                    <h4 id="selected-client-name">---</h4>
-                    <p id="selected-client-phone">---</p>
-                  </div>
+          <div id="customer-linking-area" class="linking-section glass" style="display: none; margin-top: 20px">
+            <!-- بطاقة العميل المختار -->
+            <div id="selected-client-card" class="selected-client-box" style="display: none">
+              <div class="client-info">
+                <span class="icon"><i class="fas fa-user-check"></i></span>
+                <div>
+                  <h4 id="selected-client-name">---</h4>
+                  <p id="selected-client-phone">---</p>
                 </div>
-                <button
-                  class="change-btn"
-                  onclick="resetClientSelection()"
-                  data-lang="btn_change"
-                >
-                  تغيير
-                </button>
               </div>
-              <!-- 
+              <button class="change-btn" onclick="resetClientSelection()" data-lang="btn_change">
+                تغيير
+              </button>
+            </div>
+            <!-- 
                 صندوق البحث عن عميل
                 =====================
                 - البحث برقم الهاتف
                 - عرض نتائج البحث في قائمة منسدلة
               -->
-              <div id="search-box-container" class="search-container">
-                <label
-                  style="
+            <div id="search-box-container" class="search-container">
+              <label style="
                     display: block;
                     margin-bottom: 10px;
                     color: var(--gold);
-                  "
-                  data-lang="search_client_label"
-                  >👤 لمن هذه الفاتورة؟</label
-                >
-                <div class="search-wrapper" style="position: relative">
-                  <input
-                    type="tel"
-                    id="client-search-input"
-                    dir="ltr"
-                    style="text-align: right"
-                    placeholder="05xxxxxxxx"
-                    oninput="handlePhoneSearch(this.value)"
-                  />
-                  <div id="search-results-dropdown" class="dropdown-list"></div>
-                </div>
+                  " data-lang="search_client_label">👤 لمن هذه الفاتورة؟</label>
+              <div class="search-wrapper" style="position: relative">
+                <input type="tel" id="client-search-input" dir="ltr" style="text-align: right" placeholder="05xxxxxxxx"
+                  oninput="handlePhoneSearch(this.value)" />
+                <div id="search-results-dropdown" class="dropdown-list"></div>
               </div>
-              <!-- 
+            </div>
+            <!-- 
                 زر حفظ المعاملة
                 =================
                 - يحفظ الفاتورة في ملف العميل المختار
                 - يكون معطلاً حتى يتم اختيار عميل
               -->
-              <div
-                class="final-actions"
-                style="margin-top: 20px; text-align: left"
-              >
-                <button
-                  id="btn-save-transaction"
-                  class="primary-btn"
-                  disabled
-                  onclick="saveTransactionToSheet()"
-                  style="background-color: #2ecc71"
-                >
-                  <i class="fas fa-save"></i>
-                  <span data-lang="btn_save_sheet">حفظ في ملف العميل</span>
-                </button>
-              </div>
+            <div class="final-actions" style="margin-top: 20px; text-align: left">
+              <button id="btn-save-transaction" class="primary-btn" disabled onclick="saveTransactionToSheet()"
+                style="background-color: #2ecc71">
+                <i class="fas fa-save"></i>
+                <span data-lang="btn_save_sheet">حفظ في ملف العميل</span>
+              </button>
             </div>
+          </div>
 
-            <!-- 
+          <!-- 
               أزرار التحكم الرئيسية (للستائر)
               =================================
               - إضافة ستارة جديدة
               - حساب السعر
               - تنزيل الكوتيشن (PDF)
             -->
-            <div class="actions-row">
-              <button
-                class="secondary-btn"
-                onclick="addCurtain()"
-                data-lang="btn_add_curtain"
-              >
-                إضافة ستارة
-              </button>
-              <button
-                class="primary-btn"
-                onclick="calculateCurtains()"
-                data-lang="btn_calc"
-              >
-                احسب السعر
-              </button>
-              <button
-                class="primary-btn gold"
-                onclick="generateProInvoice('curtain')"
-                data-lang="btn_download"
-              >
-                تنزيل الكوتيشن
-              </button>
-            </div>
+          <div class="actions-row">
+            <button class="secondary-btn" onclick="addCurtain()" data-lang="btn_add_curtain">
+              إضافة ستارة
+            </button>
+            <button class="primary-btn" onclick="calculateCurtains()" data-lang="btn_calc">
+              احسب السعر
+            </button>
+            <button class="primary-btn gold" onclick="generateProInvoice('curtain')" data-lang="btn_download">
+              تنزيل الكوتيشن
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- 
+      <!-- 
           ============================================
           تبويب حاسبة السجاد
           ============================================
       
         -->
-        <div id="carpet-tab" class="tab-content" style="display: none">
-          <div class="calculator-wrapper">
-            <h2 class="section-title" data-lang="title_carpet"></h2>
+      <div id="carpet-tab" class="tab-content" style="display: none">
+        <div class="calculator-wrapper">
+          <h2 class="section-title" data-lang="title_carpet"></h2>
 
-            <!-- 
+          <!-- 
               نموذج إضافة غرفة/سجادة
               ========================
               - اسم الغرفة
@@ -665,213 +501,137 @@
               - طول السجادة
               - سعر المتر
             -->
-            <div class="calc-card">
-              <h3 data-lang="add_carpet_room">إضافة غرفة / سجادة</h3>
-              <div class="inputs-grid">
-                <input
-                  type="text"
-                  id="carpet-room-name"
-                  data-lang-ph="ph_room_name"
-                  placeholder="اسم الغرفة"
-                  required
-                />
-                <input
-                  type="number"
-                  id="carpet-width"
-                  data-lang-ph="ph_width"
-                  placeholder="العرض"
-                  step="0.01"
-                />
-                <input
-                  type="number"
-                  id="carpet-length"
-                  data-lang-ph="ph_length"
-                  placeholder="الطول"
-                  step="0.01"
-                />
-                <input
-                  type="number"
-                  id="carpet-price"
-                  data-lang-ph="ph_meter_price"
-                  placeholder="سعر المتر"
-                  step="0.01"
-                />
-              </div>
-              <!-- زر حساب وإضافة الغرفة -->
-              <button
-                class="secondary-btn"
-                onclick="addCarpetRoom()"
-                style="margin-top: 15px; width: 100%"
-                data-lang="btn_calc_add"
-              >
-                حساب وإضافة
-              </button>
+          <div class="calc-card">
+            <h3 data-lang="add_carpet_room">إضافة غرفة / سجادة</h3>
+            <div class="inputs-grid">
+              <input type="text" id="carpet-room-name" data-lang-ph="ph_room_name" placeholder="اسم الغرفة" required />
+              <input type="number" id="carpet-width" data-lang-ph="ph_width" placeholder="العرض" step="0.01" />
+              <input type="number" id="carpet-length" data-lang-ph="ph_length" placeholder="الطول" step="0.01" />
+              <input type="number" id="carpet-price" data-lang-ph="ph_meter_price" placeholder="سعر المتر"
+                step="0.01" />
             </div>
+            <!-- زر حساب وإضافة الغرفة -->
+            <button class="secondary-btn" onclick="addCarpetRoom()" style="margin-top: 15px; width: 100%"
+              data-lang="btn_calc_add">
+              حساب وإضافة
+            </button>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة معاينة السجاد
               =====================
               - جدول بجميع الغرف المضافة
               - عرض المساحة وسعر المتر والإجمالي
               - إمكانية حذف أي سجادة
             -->
-            <div
-              id="carpet-preview-area"
-              class="preview-container glass"
-              style="display: none"
-            >
-              <h3 class="preview-title" data-lang="room_details">
-                تفاصيل الغرف
-              </h3>
-              <div class="table-container">
-                <table id="carpet-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th data-lang="th_room">الغرفة</th>
-                      <th data-lang="th_area">المساحة</th>
-                      <th data-lang="th_m_price">سعر المتر</th>
-                      <th data-lang="th_total">الإجمالي</th>
-                      <th data-lang="th_action">حذف</th>
-                    </tr>
-                  </thead>
-                  <tbody id="carpet-body"></tbody>
-                </table>
-              </div>
-              <div class="preview-summary">
-                <span data-lang="total_label">الإجمالي النهائي:</span>
-                <strong id="carpet-grand-total">0.00</strong>
-                <span data-lang="currency">د.إ</span>
-              </div>
+          <div id="carpet-preview-area" class="preview-container glass" style="display: none">
+            <h3 class="preview-title" data-lang="room_details">
+              تفاصيل الغرف
+            </h3>
+            <div class="table-container">
+              <table id="carpet-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th data-lang="th_room">الغرفة</th>
+                    <th data-lang="th_area">المساحة</th>
+                    <th data-lang="th_m_price">سعر المتر</th>
+                    <th data-lang="th_total">الإجمالي</th>
+                    <th data-lang="th_action">حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="carpet-body"></tbody>
+              </table>
             </div>
+            <div class="preview-summary">
+              <span data-lang="total_label">الإجمالي النهائي:</span>
+              <strong id="carpet-grand-total">0.00</strong>
+              <span data-lang="currency">د.إ</span>
+            </div>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة ربط العميل بفاتورة السجاد
               =================================
               - نفس مبدأ ربط العميل في قسم الستائر
               - مخصص لمعاملات السجاد
             -->
-            <div
-              id="carpet-linking-area"
-              class="linking-section glass"
-              style="display: none; margin-top: 20px"
-            >
-              <!-- بطاقة العميل المختار للسجاد -->
-              <div
-                id="carpet-selected-client-card"
-                class="selected-client-box"
-                style="display: none"
-              >
-                <div class="client-info">
-                  <span class="icon"><i class="fas fa-user-check"></i></span>
-                  <div>
-                    <h4 id="carpet-client-name">---</h4>
-                    <p id="carpet-client-phone">---</p>
-                  </div>
+          <div id="carpet-linking-area" class="linking-section glass" style="display: none; margin-top: 20px">
+            <!-- بطاقة العميل المختار للسجاد -->
+            <div id="carpet-selected-client-card" class="selected-client-box" style="display: none">
+              <div class="client-info">
+                <span class="icon"><i class="fas fa-user-check"></i></span>
+                <div>
+                  <h4 id="carpet-client-name">---</h4>
+                  <p id="carpet-client-phone">---</p>
                 </div>
-                <button
-                  class="change-btn"
-                  onclick="resetCarpetClientSelection()"
-                  data-lang="btn_change"
-                >
-                  تغيير
-                </button>
               </div>
-              <!-- صندوق البحث عن عميل للسجاد -->
-              <div id="carpet-search-box-container" class="search-container">
-                <label
-                  style="
+              <button class="change-btn" onclick="resetCarpetClientSelection()" data-lang="btn_change">
+                تغيير
+              </button>
+            </div>
+            <!-- صندوق البحث عن عميل للسجاد -->
+            <div id="carpet-search-box-container" class="search-container">
+              <label style="
                     display: block;
                     margin-bottom: 10px;
                     color: var(--gold);
-                  "
-                  data-lang="search_client_label"
-                  >👤 لمن الفاتورة؟</label
-                >
-                <div class="search-wrapper" style="position: relative">
-                  <input
-                    type="tel"
-                    id="carpet-search-input"
-                    dir="ltr"
-                    style="text-align: right"
-                    placeholder="05xxxxxxxx"
-                    oninput="handleCarpetSearch(this.value)"
-                  />
-                  <div id="carpet-search-results" class="dropdown-list"></div>
-                </div>
-              </div>
-              <!-- زر حفظ فاتورة السجاد -->
-              <div
-                class="final-actions"
-                style="margin-top: 20px; text-align: left"
-              >
-                <button
-                  id="btn-save-carpet"
-                  class="primary-btn"
-                  disabled
-                  onclick="saveCarpetTransaction()"
-                  style="background-color: #2ecc71"
-                >
-                  <i class="fas fa-save"></i>
-                  <span data-lang="btn_save_sheet">حفظ الفاتورة</span>
-                </button>
+                  " data-lang="search_client_label">👤 لمن الفاتورة؟</label>
+              <div class="search-wrapper" style="position: relative">
+                <input type="tel" id="carpet-search-input" dir="ltr" style="text-align: right" placeholder="05xxxxxxxx"
+                  oninput="handleCarpetSearch(this.value)" />
+                <div id="carpet-search-results" class="dropdown-list"></div>
               </div>
             </div>
+            <!-- زر حفظ فاتورة السجاد -->
+            <div class="final-actions" style="margin-top: 20px; text-align: left">
+              <button id="btn-save-carpet" class="primary-btn" disabled onclick="saveCarpetTransaction()"
+                style="background-color: #2ecc71">
+                <i class="fas fa-save"></i>
+                <span data-lang="btn_save_sheet">حفظ الفاتورة</span>
+              </button>
+            </div>
+          </div>
 
-            <!-- 
+          <!-- 
               أزرار التحكم الرئيسية (للسجاد)
               =================================
               - إضافة قياس جديد
               - حساب السعر
               - تنزيل الكوتيشن (PDF)
             -->
-            <div
-              class="actions-row"
-              style="
+          <div class="actions-row" style="
                 margin-top: 30px;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 padding-top: 20px;
-              "
-            >
-              <button
-                class="secondary-btn"
-                onclick="
+              ">
+            <button class="secondary-btn" onclick="
                   document.getElementById('carpet-room-name').focus();
                   window.scrollTo(0, 0);
-                "
-                data-lang="btn_add_measure"
-              >
-                إضافة قياس
-              </button>
-              <button
-                class="primary-btn"
-                onclick="renderCarpetTable()"
-                data-lang="btn_calc"
-              >
-                احسب السعر
-              </button>
-              <button
-                class="primary-btn gold"
-                onclick="generateProInvoice('carpet')"
-                data-lang="btn_download"
-              >
-                تنزيل الكوتيشن
-              </button>
-            </div>
+                " data-lang="btn_add_measure">
+              إضافة قياس
+            </button>
+            <button class="primary-btn" onclick="renderCarpetTable()" data-lang="btn_calc">
+              احسب السعر
+            </button>
+            <button class="primary-btn gold" onclick="generateProInvoice('carpet')" data-lang="btn_download">
+              تنزيل الكوتيشن
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- 
+      <!-- 
           ============================================
           تبويب حاسبة ورق الجدران
           ============================================
         
         -->
-        <div id="wall-tab" class="tab-content" style="display: none">
-          <div class="calculator-wrapper">
-            <h2 class="section-title" data-lang="title_wall"></h2>
+      <div id="wall-tab" class="tab-content" style="display: none">
+        <div class="calculator-wrapper">
+          <h2 class="section-title" data-lang="title_wall"></h2>
 
-            <!-- 
+          <!-- 
               نموذج بيانات الغرفة والرول
               ============================
               - اسم الغرفة
@@ -881,277 +641,170 @@
               - التكرار (Repeat)
               - سعر الرول
             -->
-            <div class="calc-card">
-              <h3 data-lang="room_roll_data">بيانات الغرفة والرول</h3>
-              <div class="inputs-grid">
-                <input
-                  type="text"
-                  id="wall-room-name"
-                  data-lang-ph="ph_room_name"
-                  placeholder="اسم الغرفة"
-                  required
-                />
-                <input
-                  type="number"
-                  id="wall-height"
-                  data-lang-ph="ph_wall_height"
-                  placeholder="ارتفاع الجدار"
-                  required
-                />
-              </div>
-              <div class="inputs-grid" style="margin-top: 10px">
-                <input
-                  type="number"
-                  id="roll-width"
-                  data-lang-ph="ph_roll_width"
-                  placeholder="عرض الرول"
-                  required
-                />
-                <input
-                  type="number"
-                  id="roll-length"
-                  data-lang-ph="ph_roll_length"
-                  placeholder="طول الرول"
-                  required
-                />
-                <input
-                  type="number"
-                  id="roll-repeat"
-                  data-lang-ph="ph_roll_repeat"
-                  placeholder="التكرار (Repeat)"
-                  value="0"
-                />
-                <input
-                  type="number"
-                  id="roll-price"
-                  data-lang-ph="ph_roll_price"
-                  placeholder="سعر الرول"
-                  required
-                />
-              </div>
+          <div class="calc-card">
+            <h3 data-lang="room_roll_data">بيانات الغرفة والرول</h3>
+            <div class="inputs-grid">
+              <input type="text" id="wall-room-name" data-lang-ph="ph_room_name" placeholder="اسم الغرفة" required />
+              <input type="number" id="wall-height" data-lang-ph="ph_wall_height" placeholder="ارتفاع الجدار"
+                required />
+            </div>
+            <div class="inputs-grid" style="margin-top: 10px">
+              <input type="number" id="roll-width" data-lang-ph="ph_roll_width" placeholder="عرض الرول" required />
+              <input type="number" id="roll-length" data-lang-ph="ph_roll_length" placeholder="طول الرول" required />
+              <input type="number" id="roll-repeat" data-lang-ph="ph_roll_repeat" placeholder="التكرار (Repeat)"
+                value="0" />
+              <input type="number" id="roll-price" data-lang-ph="ph_roll_price" placeholder="سعر الرول" required />
+            </div>
 
-              <!-- 
+            <!-- 
                 منطقة قياسات الجدران
                 ======================
                 - يمكن إضافة عدة جدران لكل غرفة
                 - كل جدار له اسم وعرض
                 - إمكانية إضافة جدار جديد
               -->
-              <div
-                style="
+            <div style="
                   background: rgba(0, 0, 0, 0.2);
                   padding: 15px;
                   border-radius: 8px;
                   margin-top: 15px;
-                "
-              >
-                <h4 data-lang="walls_measure">قياسات الجدران</h4>
-                <div id="walls-container">
-                  <div class="wall-row inputs-grid">
-                    <input
-                      type="text"
-                      class="wall-name"
-                      placeholder="جدار 1"
-                      value="جدار 1"
-                    />
-                    <input
-                      type="number"
-                      class="wall-width"
-                      data-lang-ph="ph_wall_width"
-                      placeholder="عرض الجدار"
-                    />
-                    <button
-                      class="danger-btn remove-wall-btn"
-                      onclick="removeWallInput(this)"
-                      style="display: none"
-                    >
-                      ×
-                    </button>
-                  </div>
+                ">
+              <h4 data-lang="walls_measure">قياسات الجدران</h4>
+              <div id="walls-container">
+                <div class="wall-row inputs-grid">
+                  <input type="text" class="wall-name" placeholder="جدار 1" value="جدار 1" />
+                  <input type="number" class="wall-width" data-lang-ph="ph_wall_width" placeholder="عرض الجدار" />
+                  <button class="danger-btn remove-wall-btn" onclick="removeWallInput(this)" style="display: none">
+                    ×
+                  </button>
                 </div>
-                <!-- زر إضافة جدار جديد -->
-                <button
-                  class="secondary-btn"
-                  onclick="addWallInput()"
-                  style="width: auto; margin-top: 10px"
-                  data-lang="btn_add_wall"
-                >
-                  + جدار آخر
-                </button>
               </div>
-              <!-- زر حساب عدد الرولات -->
-              <button
-                class="secondary-btn"
-                onclick="calculateWallpaperRoom()"
-                style="margin-top: 20px; width: 100%"
-                data-lang="btn_calc_roll"
-              >
-                حساب الرولات
+              <!-- زر إضافة جدار جديد -->
+              <button class="secondary-btn" onclick="addWallInput()" style="width: auto; margin-top: 10px"
+                data-lang="btn_add_wall">
+                + جدار آخر
               </button>
             </div>
+            <!-- زر حساب عدد الرولات -->
+            <button class="secondary-btn" onclick="calculateWallpaperRoom()" style="margin-top: 20px; width: 100%"
+              data-lang="btn_calc_roll">
+              حساب الرولات
+            </button>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة معاينة ورق الجدران
               ==========================
               - جدول بجميع الغرف المضافة
               - عدد الجدران وإجمالي العرض وعدد الرولات
               - إمكانية حذف أي غرفة
             -->
-            <div
-              id="wall-preview-area"
-              class="preview-container glass"
-              style="display: none"
-            >
-              <h3 class="preview-title" data-lang="room_details">التفاصيل</h3>
-              <div class="table-container">
-                <table id="wall-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th data-lang="th_room">الغرفة</th>
-                      <th data-lang="th_walls_count">عدد الجدران</th>
-                      <th data-lang="th_total_width">إجمالي العرض</th>
-                      <th data-lang="th_rolls_count">عدد الرولات</th>
-                      <th data-lang="th_total">السعر</th>
-                      <th data-lang="th_action">حذف</th>
-                    </tr>
-                  </thead>
-                  <tbody id="wall-body"></tbody>
-                </table>
-              </div>
-              <div class="preview-summary">
-                <div
-                  style="
+          <div id="wall-preview-area" class="preview-container glass" style="display: none">
+            <h3 class="preview-title" data-lang="room_details">التفاصيل</h3>
+            <div class="table-container">
+              <table id="wall-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th data-lang="th_room">الغرفة</th>
+                    <th data-lang="th_walls_count">عدد الجدران</th>
+                    <th data-lang="th_total_width">إجمالي العرض</th>
+                    <th data-lang="th_rolls_count">عدد الرولات</th>
+                    <th data-lang="th_total">السعر</th>
+                    <th data-lang="th_action">حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="wall-body"></tbody>
+              </table>
+            </div>
+            <div class="preview-summary">
+              <div style="
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 5px;
-                  "
-                >
-                  <span data-lang="total_rolls_label">إجمالي الرولات:</span>
-                  <strong id="wall-total-rolls">0</strong>
-                </div>
-                <div
-                  style="
+                  ">
+                <span data-lang="total_rolls_label">إجمالي الرولات:</span>
+                <strong id="wall-total-rolls">0</strong>
+              </div>
+              <div style="
                     border-top: 1px solid rgba(255, 255, 255, 0.1);
                     padding-top: 10px;
-                  "
-                >
-                  <span data-lang="total_label">الإجمالي النهائي:</span>
-                  <strong id="wall-grand-total">0.00</strong> <span>د.إ</span>
-                </div>
+                  ">
+                <span data-lang="total_label">الإجمالي النهائي:</span>
+                <strong id="wall-grand-total">0.00</strong> <span>د.إ</span>
               </div>
             </div>
+          </div>
 
-            <!-- 
+          <!-- 
               منطقة ربط العميل بفاتورة ورق الجدران
               =====================================
               - نفس مبدأ ربط العميل في الأقسام الأخرى
               - مخصص لمعاملات ورق الجدران
             -->
-            <div
-              id="wall-linking-area"
-              class="linking-section glass"
-              style="display: none; margin-top: 20px"
-            >
-              <!-- بطاقة العميل المختار لورق الجدران -->
-              <div
-                id="wall-selected-client-card"
-                class="selected-client-box"
-                style="display: none"
-              >
-                <div class="client-info">
-                  <span class="icon"><i class="fas fa-user-check"></i></span>
-                  <div>
-                    <h4 id="wall-client-name">---</h4>
-                    <p id="wall-client-phone">---</p>
-                  </div>
+          <div id="wall-linking-area" class="linking-section glass" style="display: none; margin-top: 20px">
+            <!-- بطاقة العميل المختار لورق الجدران -->
+            <div id="wall-selected-client-card" class="selected-client-box" style="display: none">
+              <div class="client-info">
+                <span class="icon"><i class="fas fa-user-check"></i></span>
+                <div>
+                  <h4 id="wall-client-name">---</h4>
+                  <p id="wall-client-phone">---</p>
                 </div>
-                <button
-                  class="change-btn"
-                  onclick="resetWallClientSelection()"
-                  data-lang="btn_change"
-                >
-                  تغيير
-                </button>
               </div>
-              <!-- صندوق البحث عن عميل لورق الجدران -->
-              <div id="wall-search-box-container" class="search-container">
-                <label
-                  style="
+              <button class="change-btn" onclick="resetWallClientSelection()" data-lang="btn_change">
+                تغيير
+              </button>
+            </div>
+            <!-- صندوق البحث عن عميل لورق الجدران -->
+            <div id="wall-search-box-container" class="search-container">
+              <label style="
                     display: block;
                     margin-bottom: 10px;
                     color: var(--gold);
-                  "
-                  data-lang="search_client_label"
-                  >👤 لمن الفاتورة؟</label
-                >
-                <div class="search-wrapper" style="position: relative">
-                  <input
-                    type="tel"
-                    id="wall-search-input"
-                    dir="ltr"
-                    placeholder="05xxxxxxxx"
-                    style="text-align: right"
-                    oninput="handleWallSearch(this.value)"
-                  />
-                  <div id="wall-search-results" class="dropdown-list"></div>
-                </div>
-              </div>
-              <!-- زر حفظ فاتورة ورق الجدران -->
-              <div
-                class="final-actions"
-                style="margin-top: 20px; text-align: left"
-              >
-                <button
-                  id="btn-save-wall"
-                  class="primary-btn"
-                  disabled
-                  onclick="saveWallTransaction()"
-                  style="background-color: #2ecc71"
-                >
-                  <i class="fas fa-save"></i>
-                  <span data-lang="btn_save_sheet">حفظ الفاتورة</span>
-                </button>
+                  " data-lang="search_client_label">👤 لمن الفاتورة؟</label>
+              <div class="search-wrapper" style="position: relative">
+                <input type="tel" id="wall-search-input" dir="ltr" placeholder="05xxxxxxxx" style="text-align: right"
+                  oninput="handleWallSearch(this.value)" />
+                <div id="wall-search-results" class="dropdown-list"></div>
               </div>
             </div>
+            <!-- زر حفظ فاتورة ورق الجدران -->
+            <div class="final-actions" style="margin-top: 20px; text-align: left">
+              <button id="btn-save-wall" class="primary-btn" disabled onclick="saveWallTransaction()"
+                style="background-color: #2ecc71">
+                <i class="fas fa-save"></i>
+                <span data-lang="btn_save_sheet">حفظ الفاتورة</span>
+              </button>
+            </div>
+          </div>
 
-            <!-- 
+          <!-- 
               أزرار التحكم الرئيسية (لورق الجدران)
               =====================================
               - إضافة غرفة جديدة
               - تنزيل الكوتيشن (PDF)
             -->
-            <div
-              class="actions-row"
-              style="
+          <div class="actions-row" style="
                 margin-top: 30px;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 padding-top: 20px;
-              "
-            >
-              <button
-                class="secondary-btn"
-                onclick="
+              ">
+            <button class="secondary-btn" onclick="
                   document.getElementById('wall-room-name').focus();
                   window.scrollTo(0, 0);
-                "
-                data-lang="btn_new_room"
-              >
-                غرفة جديدة
-              </button>
-              <button
-                class="primary-btn gold"
-                onclick="exportWallPDF()"
-                data-lang="btn_download"
-              >
-                تنزيل الكوتيشن
-              </button>
-            </div>
+                " data-lang="btn_new_room">
+              غرفة جديدة
+            </button>
+            <button class="primary-btn gold" onclick="exportWallPDF()" data-lang="btn_download">
+              تنزيل الكوتيشن
+            </button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- 
+    <!-- 
         ============================================
         قسم المتابعة (Tracking)
         ============================================
@@ -1159,67 +812,55 @@
         - تصفية الطلبات حسب الحالة
         - عرض جميع الطلبات في جدول
       -->
-      <section id="tracking-section" class="page-section">
-        <div class="section-header">
-          <!-- 
+    <section id="tracking-section" class="page-section">
+      <div class="section-header">
+        <!-- 
             أزرار التصفية حسب حالة الطلب
             ==============================
             - عرض الكل
             - عرض الطلبات قيد التنفيذ
             - عرض الطلبات المكتملة
           -->
-          <div class="tracking-filters">
-            <button
-              class="filter-btn active"
-              onclick="filterOrders('all')"
-              data-lang="filter_all"
-            >
-              الكل
-            </button>
-            <button
-              class="filter-btn"
-              onclick="filterOrders('pending')"
-              data-lang="filter_pending"
-            >
-              ⏳ قيد التنفيذ
-            </button>
-            <button
-              class="filter-btn"
-              onclick="filterOrders('completed')"
-              data-lang="filter_completed"
-            >
-              ✅ مكتمل
-            </button>
-          </div>
+        <div class="tracking-filters">
+          <button class="filter-btn active" onclick="filterOrders('all')" data-lang="filter_all">
+            الكل
+          </button>
+          <button class="filter-btn" onclick="filterOrders('pending')" data-lang="filter_pending">
+            ⏳ قيد التنفيذ
+          </button>
+          <button class="filter-btn" onclick="filterOrders('completed')" data-lang="filter_completed">
+            ✅ مكتمل
+          </button>
         </div>
+      </div>
 
-        <!-- 
+      <!-- 
           جدول متابعة الطلبات
           =====================
           - يعرض جميع الطلبات مع تفاصيلها
           - أعمدة: رقم المسلسل، الاسم، الهاتف، العنوان، نوع الخدمة، المدفوع، الإجمالي، الحالة
         -->
-        <div class="table-container">
-          <table class="tracking-table">
-            <thead>
-              <tr>
-                <th data-lang="th_id">رقم المسلسل</th>
-                <th data-lang="th_name">الاسم</th>
-                <th data-lang="th_phone">رقم الهاتف</th>
-                <th data-lang="th_addr">العنوان</th>
-                <th data-lang="th_type">نوع الخدمة</th>
-                <th data-lang="th_paid">المدفوع</th>
-                <th data-lang="th_total">الإجمالي</th>
-                <th data-lang="th_status">الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="orders-body"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+      <div class="table-container">
+        <table class="tracking-table">
+          <thead>
+            <tr>
+              <th data-lang="th_id">رقم المسلسل</th>
+              <th data-lang="th_name">الاسم</th>
+              <th data-lang="th_phone">رقم الهاتف</th>
+              <th data-lang="th_addr">العنوان</th>
+              <th data-lang="th_type">نوع الخدمة</th>
+              <th data-lang="th_paid">المدفوع</th>
+              <th data-lang="th_total">الإجمالي</th>
+              <th data-lang="th_status">الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-    <!-- 
+  <!-- 
       ============================================
       نافذة الإضافة السريعة للعميل (Modal)
       ============================================
@@ -1227,59 +868,30 @@
       - نموذج مصغر لإضافة عميل جديد بسرعة
       - يتم فتحها من أقسام الحاسبة عند البحث عن عميل غير موجود
     -->
-    <div id="quick-add-modal" class="modal">
-      <div class="modal-content small-modal">
-        <span class="close" onclick="closeQuickAdd()">&times;</span>
-        <h3 data-lang="quick_add_title">⚡ إضافة عميل جديد</h3>
-        <div class="inputs-grid">
-          <input
-            type="text"
-            id="quick-name"
-            data-lang-ph="client_name_ph"
-            placeholder="اسم العميل *"
-            required
-          />
-          <div style="position: relative">
-            <input
-              type="tel"
-              id="quick-phone"
-              data-lang-ph="client_phone_ph"
-              placeholder="رقم الهاتف"
-              dir="ltr"
-              style="text-align: right"
-              maxlength="10"
-              required
-            />
-            <small id="phone-feedback"></small>
-          </div>
-          <input
-            type="text"
-            id="quick-address"
-            data-lang-ph="client_addr_ph"
-            placeholder="العنوان"
-          />
+  <div id="quick-add-modal" class="modal">
+    <div class="modal-content small-modal">
+      <span class="close" onclick="closeQuickAdd()">&times;</span>
+      <h3 data-lang="quick_add_title">⚡ إضافة عميل جديد</h3>
+      <div class="inputs-grid">
+        <input type="text" id="quick-name" data-lang-ph="client_name_ph" placeholder="اسم العميل *" required />
+        <div style="position: relative">
+          <input type="tel" id="quick-phone" data-lang-ph="client_phone_ph" placeholder="رقم الهاتف" dir="ltr"
+            style="text-align: right" maxlength="10" required />
+          <small id="phone-feedback"></small>
         </div>
-        <textarea
-          id="quick-notes"
-          data-lang-ph="client_notes_ph"
-          placeholder="ملاحظات"
-          rows="1"
-        ></textarea>
-        <!-- زر حفظ واختيار العميل -->
-        <div>
-          <button
-            class="one"
-            onclick="saveQuickClient()"
-            disabled
-            data-lang="btn_save_select"
-          >
-            حفظ واختيار العميل
-          </button>
-        </div>
+        <input type="text" id="quick-address" data-lang-ph="client_addr_ph" placeholder="العنوان" />
+      </div>
+      <textarea id="quick-notes" data-lang-ph="client_notes_ph" placeholder="ملاحظات" rows="1"></textarea>
+      <!-- زر حفظ واختيار العميل -->
+      <div>
+        <button class="one" onclick="saveQuickClient()" disabled data-lang="btn_save_select">
+          حفظ واختيار العميل
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- 
+  <!-- 
       ============================================
       قالب الفاتورة المخفي (Invoice Template)
       ============================================
@@ -1288,90 +900,90 @@
       - مخفي في الصفحة ولا يظهر للمستخدم
       - يتم ملؤه بالبيانات ثم تحويله لـ PDF
     -->
-    <div id="invoice-template">
-      <div class="invoice-container">
-        <!-- 
+  <div id="invoice-template">
+    <div class="invoice-container">
+      <!-- 
           رأس الفاتورة
           =============
           - شعار واسم الشركة
           - معلومات الشركة (العنوان، TRN، الهاتف)
           - عنوان الفاتورة (QUOTATION)
         -->
-        <header class="inv-header">
-          <div class="inv-top-row">
-            <div class="inv-logo">
-              <h1 style="color: #8b4513; margin: 0" data-lang="company_name">
-                الفارس للمفروشات
-              </h1>
-              <h2 style="color: #000; margin: 0; font-size: 16px">
-                AL FARIS FURNITURE
-              </h2>
-            </div>
-            <div class="inv-company-info">
-              <p><strong>Address:</strong> Naif Road, Deira, Dubai, UAE</p>
-              <p><strong>TRN:</strong> 100359849000003</p>
-              <p><strong>Tel:</strong> 04-2724240 / 050xxxxxxx</p>
-            </div>
-            <div class="inv-title-box">
-              <h3 id="inv-type-title">QUOTATION</h3>
-            </div>
+      <header class="inv-header">
+        <div class="inv-top-row">
+          <div class="inv-logo">
+            <h1 style="color: #8b4513; margin: 0" data-lang="company_name">
+              الفارس للمفروشات
+            </h1>
+            <h2 style="color: #000; margin: 0; font-size: 16px">
+              AL FARIS FURNITURE
+            </h2>
           </div>
-          <!-- 
+          <div class="inv-company-info">
+            <p><strong>Address:</strong> Naif Road, Deira, Dubai, UAE</p>
+            <p><strong>TRN:</strong> 100359849000003</p>
+            <p><strong>Tel:</strong> 04-2724240 / 050xxxxxxx</p>
+          </div>
+          <div class="inv-title-box">
+            <h3 id="inv-type-title">QUOTATION</h3>
+          </div>
+        </div>
+        <!-- 
             تفاصيل الفاتورة
             ================
             - اليسار: رقم الفاتورة، التاريخ، المشروع
             - اليمين: معلومات العميل (الاسم، الهاتف، العنوان)
           -->
-          <div class="inv-details-grid">
-            <div class="box-left">
-              <div class="row">
-                <strong>Ref No:</strong> <span id="inv-no">---</span>
-              </div>
-              <div class="row">
-                <strong>Date:</strong> <span id="inv-date">---</span>
-              </div>
-              <div class="row">
-                <strong>Project:</strong> <span>Interior Design</span>
-              </div>
+        <div class="inv-details-grid">
+          <div class="box-left">
+            <div class="row">
+              <strong>Ref No:</strong> <span id="inv-no">---</span>
             </div>
-            <div class="box-right">
-              <div class="row">
-                <strong>Customer:</strong> <span id="inv-client-name">---</span>
-              </div>
-              <div class="row">
-                <strong>Contact:</strong> <span id="inv-client-phone">---</span>
-              </div>
-              <div class="row">
-                <strong>Address:</strong> <span id="inv-client-addr">---</span>
-              </div>
+            <div class="row">
+              <strong>Date:</strong> <span id="inv-date">---</span>
+            </div>
+            <div class="row">
+              <strong>Project:</strong> <span>Interior Design</span>
             </div>
           </div>
-        </header>
-        <!-- 
+          <div class="box-right">
+            <div class="row">
+              <strong>Customer:</strong> <span id="inv-client-name">---</span>
+            </div>
+            <div class="row">
+              <strong>Contact:</strong> <span id="inv-client-phone">---</span>
+            </div>
+            <div class="row">
+              <strong>Address:</strong> <span id="inv-client-addr">---</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- 
           جسم الفاتورة (جدول المنتجات/الخدمات)
           =====================================
           - يعرض تفاصيل العناصر المباعة
           - أعمدة: الرقم، الوصف، القياس، الوحدة، الكمية، سعر الوحدة، المبلغ، الضريبة، الإجمالي
         -->
-        <main class="inv-body">
-          <table class="inv-table">
-            <thead>
-              <tr>
-                <th width="5%">No</th>
-                <th width="30%">Description</th>
-                <th width="15%">Size/Dim</th>
-                <th width="8%">Unit</th>
-                <th width="8%">QTY</th>
-                <th width="10%">Unit Price</th>
-                <th width="10%">Amount</th>
-                <th width="8%">VAT 5%</th>
-                <th width="12%">Gross</th>
-              </tr>
-            </thead>
-            <tbody id="inv-table-body"></tbody>
-          </table>
-        </main>
-        <!-- 
+      <main class="inv-body">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th width="5%">No</th>
+              <th width="30%">Description</th>
+              <th width="15%">Size/Dim</th>
+              <th width="8%">Unit</th>
+              <th width="8%">QTY</th>
+              <th width="10%">Unit Price</th>
+              <th width="10%">Amount</th>
+              <th width="8%">VAT 5%</th>
+              <th width="12%">Gross</th>
+            </tr>
+          </thead>
+          <tbody id="inv-table-body"></tbody>
+        </table>
+      </main>
+      <!-- 
           تذييل الفاتورة
           ===============
           - قسم المجاميع: الإجمالي قبل الضريبة، الضريبة، الإجمالي النهائي
@@ -1380,58 +992,56 @@
           - ختم الشركة
           - شروط الفاتورة
         -->
-        <footer class="inv-footer">
-          <div class="totals-section">
-            <div class="total-row">
-              <span>Total Before Tax:</span>
-              <span id="inv-total-before">0.00</span>
-            </div>
-            <div class="total-row">
-              <span>Total Tax (5%):</span> <span id="inv-total-tax">0.00</span>
-            </div>
-            <div class="total-row grand-total">
-              <span>Grand Total:</span>
-              <span id="inv-grand-total">0.00 AED</span>
-            </div>
-            <div class="amount-in-words" id="inv-words"></div>
+      <footer class="inv-footer">
+        <div class="totals-section">
+          <div class="total-row">
+            <span>Total Before Tax:</span>
+            <span id="inv-total-before">0.00</span>
           </div>
-          <div class="signatures">
-            <div class="sig-box">
-              <p class="sig-title">Sales Manager</p>
-              <p>FAKHR ALDDIN</p>
-              <div class="sig-line"></div>
-              <p>Signature</p>
-            </div>
-            <div class="sig-box">
-              <p class="sig-title">Customer Approval</p>
-              <p id="inv-sig-client">---</p>
-              <div class="sig-line"></div>
-              <p>Signature</p>
-            </div>
-            <div class="stamp-area">
-              <div
-                style="
+          <div class="total-row">
+            <span>Total Tax (5%):</span> <span id="inv-total-tax">0.00</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Grand Total:</span>
+            <span id="inv-grand-total">0.00 AED</span>
+          </div>
+          <div class="amount-in-words" id="inv-words"></div>
+        </div>
+        <div class="signatures">
+          <div class="sig-box">
+            <p class="sig-title">Sales Manager</p>
+            <p>FAKHR ALDDIN</p>
+            <div class="sig-line"></div>
+            <p>Signature</p>
+          </div>
+          <div class="sig-box">
+            <p class="sig-title">Customer Approval</p>
+            <p id="inv-sig-client">---</p>
+            <div class="sig-line"></div>
+            <p>Signature</p>
+          </div>
+          <div class="stamp-area">
+            <div style="
                   border: 3px double #1e3a8a;
                   color: #1e3a8a;
                   padding: 10px;
                   font-weight: bold;
                   border-radius: 10px;
                   text-align: center;
-                "
-              >
-                AL FARIS FURNITURE<br />DUBAI - U.A.E
-              </div>
+                ">
+              AL FARIS FURNITURE<br />DUBAI - U.A.E
             </div>
           </div>
-          <div class="bottom-bar">
-            Terms: Goods sold are not returnable | 50% Advance Required | Valid
-            for 7 Days
-          </div>
-        </footer>
-      </div>
+        </div>
+        <div class="bottom-bar">
+          Terms: Goods sold are not returnable | 50% Advance Required | Valid
+          for 7 Days
+        </div>
+      </footer>
     </div>
+  </div>
 
-    <!-- 
+  <!-- 
       ============================================
       نافذة عرض ملف العميل (Profile Modal)
       ============================================
@@ -1440,100 +1050,231 @@
       - تعرض سجل المعاملات للعميل
       - إمكانية تنزيل ملف العميل كـ PDF
     -->
-    <div id="profile-modal" class="modal">
-      <div id="profile-content-box" class="modal-content profile-content">
-        <!-- زر إغلاق النافذة -->
-        <span class="close no-print" onclick="closeProfileModal()"
-          >&times;</span
-        >
+  <div id="profile-modal" class="modal">
+    <div id="profile-content-box" class="modal-content profile-content">
+      <!-- زر إغلاق النافذة -->
+      <span class="close no-print" onclick="closeProfileModal()">&times;</span>
 
-        <!-- 
+      <!-- 
           أزرار التحكم في ملف العميل
           ===========================
           - زر تنزيل ملف العميل كـ PDF
         -->
 
-        <!-- 
+      <!-- 
           رأس ملف العميل
           ===============
           - صورة رمزية للعميل
           - معلومات العميل (الاسم، الهاتف، العنوان)
           - إحصائيات العميل (إجمالي المبلغ، المدفوع، المتبقي)
         -->
-        <div class="profile-header">
-          <div class="p-icon"><i class="fas fa-user-circle"></i></div>
-          <div class="p-info">
-            <h2 id="p-name">---</h2>
-            <p id="p-phone">---</p>
-            <p id="p-address" style="font-size: 0.9rem; color: #bbb">---</p>
+      <div class="profile-header">
+        <div class="p-icon"><i class="fas fa-user-circle"></i></div>
+        <div class="p-info">
+          <h2 id="p-name">---</h2>
+          <p id="p-phone">---</p>
+          <p id="p-address" style="font-size: 0.9rem; color: #bbb">---</p>
+        </div>
+        <div class="p-stats">
+          <div class="stat-box">
+            <span>إجمالي المبلغ</span>
+            <strong id="p-total-spent">0.00</strong>
           </div>
-          <div class="p-stats">
-            <div class="stat-box">
-              <span>إجمالي المبلغ</span>
-              <strong id="p-total-spent">0.00</strong>
-            </div>
-            <div class="stat-box">
-              <span>المدفوع</span>
-              <strong id="p-total-paid">0.00</strong>
-            </div>
-            <div class="stat-box">
-              <span>المتبقي</span>
-              <strong id="p-total-due" style="color: #e74c3c">0.00</strong>
-            </div>
+          <div class="stat-box">
+            <span>المدفوع</span>
+            <strong id="p-total-paid">0.00</strong>
+          </div>
+          <div class="stat-box">
+            <span>المتبقي</span>
+            <strong id="p-total-due" style="color: #e74c3c">0.00</strong>
           </div>
         </div>
+      </div>
 
-        <!-- 
+      <!-- 
           قسم سجل المعاملات للعميل
           ==========================
           - يعرض تاريخ جميع معاملات العميل
           - جدول بالمعاملات: التاريخ، التفاصيل، الخدمة، المدفوع، الإجمالي، الحالة
         -->
-        <h3
-          style="
+      <h3 style="
             color: var(--gold);
             margin: 20px 0 10px;
             border-bottom: 1px solid #444;
             padding-bottom: 5px;
-          "
-        >
-          <i class="fas fa-history"></i> سجل المعاملات
-        </h3>
+          ">
+        <i class="fas fa-history"></i> سجل المعاملات
+      </h3>
 
-        <div
-          class="table-container"
-          style="max-height: 400px; overflow-y: auto"
-        >
-          <table class="history-table" id="profile-table">
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>الغرفة / التفاصيل</th>
-                <th>الخدمة</th>
-                <th>المدفوع</th>
-                <th>الإجمالي</th>
-                <th>الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="p-history-body"></tbody>
-          </table>
-        </div>
-        <div class="profile-actions no-print">
-          <button class="primary-btn gold" onclick="downloadProfilePDF()">
-            <i class="fas fa-file-pdf"></i> تنزيل ملف العميل (PDF)
-          </button>
-        </div>
+      <div class="table-container" style="max-height: 400px; overflow-y: auto">
+        <table class="history-table" id="profile-table">
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الغرفة / التفاصيل</th>
+              <th>الخدمة</th>
+              <th>المدفوع</th>
+              <th>الإجمالي</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="p-history-body"></tbody>
+        </table>
+      </div>
+      <div class="profile-actions no-print">
+        <button class="primary-btn gold" onclick="downloadProfilePDF()">
+          <i class="fas fa-file-pdf"></i> تنزيل ملف العميل (PDF)
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- 
+  <!-- 
       ============================================
       ملفات JavaScript الداخلية
       ============================================
       - script.js: الكود الرئيسي للتطبيق
       - curtain-calculator.js: دوال خاصة بحاسبة الستائر
     -->
-    <script src="script.js"></script>
-    <script src="curtain-calculator.js"></script>
-  </body>
+  <script src="script.js"></script>
+  <script src="curtain-calculator.js"></script>
+  <!-- 
+      ============================================
+      QUTATION TEMPLATE (PDF GENERATION)
+      ============================================
+    -->
+  <div id="invoice-template">
+    <!-- Top Header -->
+    <div class="inv-header">
+      <div class="inv-title">
+        <h1>QUOTATION</h1>
+        <p style="margin-top: 10px; font-weight: bold">
+          Works Done up to: 7 Days
+        </p>
+      </div>
+      <div class="inv-company-info">
+        <h2>Al Faris Furniture</h2>
+        <p>TRN: 100XXXXXXXXXXXX</p>
+        <p>Tel: +971 50 XXXXXXX</p>
+        <p>Address: Sharjah, UAE</p>
+      </div>
+    </div>
+
+    <!-- Meta Data Grid -->
+    <div class="inv-meta-grid">
+      <!-- Left Column -->
+      <div class="inv-meta-col">
+        <div class="meta-row">
+          <span class="meta-label">Quotation No:</span>
+          <span class="meta-val" id="inv-no">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Date:</span>
+          <span class="meta-val" id="inv-date">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Project No:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Project Name:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">PO No:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Description:</span>
+          <span class="meta-val" id="inv-desc-title">Curtains & Upholstery</span>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="inv-meta-col">
+        <div class="meta-row">
+          <span class="meta-label">Contract Ref:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">PO/MWC/PCO:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Customer:</span>
+          <span class="meta-val" id="inv-client-name">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Address:</span>
+          <span class="meta-val" id="inv-client-addr">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Tax Reg No:</span>
+          <span class="meta-val">---</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Phone:</span>
+          <span class="meta-val" id="inv-client-phone">---</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="inv-table-container">
+      <table id="inv-table">
+        <thead>
+          <tr>
+            <th rowspan="2" style="width: 5%">No.</th>
+            <th rowspan="2" style="width: 30%">Description</th>
+            <th colspan="2" style="width: 10%">Size</th>
+            <th rowspan="2" style="width: 5%">Unit</th>
+            <th rowspan="2" style="width: 5%">QTY</th>
+            <th rowspan="2" style="width: 10%">Unit Price</th>
+            <th rowspan="2" style="width: 10%">Amount Before Tax</th>
+            <th rowspan="2" style="width: 5%">Tax (5%)</th>
+            <th rowspan="2" style="width: 10%">Tax Amount</th>
+            <th rowspan="2" style="width: 10%">Gross Amount</th>
+          </tr>
+          <tr>
+            <th>W</th>
+            <th>H</th>
+          </tr>
+        </thead>
+        <tbody id="inv-table-body">
+          <!-- Rows will be injected via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="inv-footer">
+      <div class="inv-totals">
+        <div class="totals-box">
+          <div class="total-row">
+            <span>Discount:</span>
+            <span>0.00</span>
+          </div>
+          <div class="total-row">
+            <span>Total Before Tax:</span>
+            <span id="inv-total-before">0.00</span>
+          </div>
+          <div class="total-row">
+            <span>Total TAX (5%):</span>
+            <span id="inv-total-tax">0.00</span>
+          </div>
+          <div class="total-row">
+            <span>Grand Total:</span>
+            <span id="inv-grand-total">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inv-signatures">
+        <div class="sig-block">Manager Signature</div>
+        <div class="sig-block">Customer Approval</div>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>
